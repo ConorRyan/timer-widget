@@ -55,20 +55,22 @@ Home-screen widgets (per-widget live countdown)
 |---|---|---|
 | `TimerDef` / `TimerStore` | `data/Timers.kt` | Serializable timer model (incl. picked alarm ringtone URI + title); persists the timer list as one JSON string in DataStore Preferences (`timers` store, key `timers_json`). Corrupt data decodes to an empty list. |
 | `TimerViewModel` | `ui/TimerViewModel.kt` | Owns UI state. Applies mutations to the in-memory list first (so bound TextFields never lag), then persists in the background. |
-| `MainActivity` / `App.kt` | root | Compose list of timers with add/edit `AlertDialog` (name, emoji picker, h/m/s fields, alarm-sound picker fed by `AlarmSounds`); requests `POST_NOTIFICATIONS` on API 33+. |
+| `MainActivity` / `App.kt` | root | Compose list of timers with add/edit `AlertDialog` (name, emoji picker, h/m/s fields, alarm-sound picker fed by `AlarmSounds`: tap a sound to preview it, OK applies, Cancel leaves the choice unchanged); requests `POST_NOTIFICATIONS` on API 33+. |
 | `TimerWidget` / `TimerWidgetViews` | `widget/TimerWidget.kt` | `AppWidgetProvider`; `onUpdate` renders each widget via `TimerWidgetViews.update` (async with `goAsync`). Widget tap = toggle `PendingIntent` created with `PendingIntent.getForegroundService` — a plain `getService` dispatch is rejected by the system when the app is backgrounded/force-closed ("Background start not allowed"). Unconfigured widget tap opens the app. |
 | `TimerService` | `widget/TimerService.kt` | Special-use foreground service. `onStartCommand` calls `startForeground` on every delivery before handling the action (the widget tap's `getForegroundService` dispatch requires it, even for toggle-off paths). Static `active: ConcurrentHashMap<widgetId, Active>` holds running timers (end time computed from wall clock, so it survives process churn within a session). One shared ticker job fires each second: updates every widget's `RemoteViews` and the foreground notification, and plays the alarm (via `AlarmPlayer`) when a timer finishes. When no timer is left counting down, the foreground notification itself becomes the alarm (single notification, Stop action, `timer_alarm_quiet` channel); a separate swipeable alarm notification is posted only while other timers still run. Alarm channels: a single silent `timer_alarm_quiet` channel (IMPORTANCE_HIGH); legacy sound-bearing channels are deleted in `ensureChannels`, since channel sound proved unreliable (one-shot, notification-stream routing on some OEMs, unplayable URIs → silence). Stopping an alarm (notification Stop action / delete intent) clears the finished entry, so the next widget tap starts a new run instead of toggling a leftover off. Service stops itself when no timers are active. |
 | `AlarmPlayer` | `widget/AlarmPlayer.kt` | Owns alarm playback: a looping `MediaPlayer` per widget on the alarm audio stream (`USAGE_ALARM`), started when a timer finishes and stopped on every dismissal path (notification delete intent, "Stop" action, widget toggle-off, Clear All, service destroy). Falls back from the per-timer tone to the system default alarm tone if the picked tone is unplayable. |
 | `TimerWidgetConfig` | `widget/TimerWidgetConfig.kt` | Widget configure/reconfigure activity: pick which timer a widget controls, stores the mapping in `WidgetPrefs`, returns `RESULT_OK`. |
 | `WidgetPrefs` | `widget/WidgetPrefs.kt` | SharedPreferences (`widgets` file) mapping `widget_<id>` -> timer ID; cleared in `onDeleted`. |
 | `formatHms` | `util/Format.kt` | `m:ss` / `h:mm:ss` formatting used by app, widget, and notifications. |
-| `AlarmSound` / `AlarmSounds` | `util/AlarmSounds.kt` | Enumerates the device's preloaded alarm ringtones via `RingtoneManager` for the per-timer sound picker. |
+| `AlarmSound` / `AlarmSounds` | `util/AlarmSounds.kt` | Enumerates the device's preloaded alarm ringtones via `RingtoneManager` for the per-timer sound picker; `defaultUri` resolves the "Default" option's preview and the alarm fallback tone. |
+| `SoundPreviewPlayer` | `util/SoundPreview.kt` | One-shot preview of a candidate alarm tone while the user picks sounds (alarm stream, no looping; replaced on the next tap, stopped when the picker closes). |
 
 ### Tests
 
 JUnit + Robolectric under `app/src/test/`: `TimerDefTest` (model),
 `TimerViewModelTest` (state transitions), `FormatHmsTest` (formatting),
-`AlarmPlayerTest` (playback + fallback), `TimerServiceStopAlarmTest`,
+`AlarmPlayerTest` (playback + fallback), `SoundPreviewPlayerTest`
+(preview playback), `TimerServiceStopAlarmTest`,
 `TimerServiceStartForegroundTest` (startForeground contract for every
 command), `TimerWidgetViewsTest` (toggle PendingIntent dispatches as a
 foreground-service start). Run with

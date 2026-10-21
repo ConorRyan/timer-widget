@@ -33,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,11 +50,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import android.net.Uri
 import io.github.conorryan.timerwidget.data.TimerDef
 import io.github.conorryan.timerwidget.ui.TimerViewModel
 import io.github.conorryan.timerwidget.ui.TimerWidgetTheme
 import io.github.conorryan.timerwidget.util.AlarmSound
 import io.github.conorryan.timerwidget.util.AlarmSounds
+import io.github.conorryan.timerwidget.util.SoundPreviewPlayer
 import io.github.conorryan.timerwidget.util.formatHms
 import java.util.UUID
 
@@ -298,6 +301,15 @@ private fun SoundPickerDialog(
     onSelect: (AlarmSound?) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val context = LocalContext.current
+    val previewPlayer = remember { SoundPreviewPlayer() }
+    // Candidate the OK button applies; null means "Default". Seeded from the
+    // timer's current sound so opening the picker and tapping OK changes
+    // nothing.
+    var candidateUri by remember { mutableStateOf(selectedUri) }
+    DisposableEffect(Unit) {
+        onDispose { previewPlayer.stop() }
+    }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.timer_sound)) },
@@ -306,20 +318,31 @@ private fun SoundPickerDialog(
                 item {
                     SoundOption(
                         title = stringResource(R.string.timer_sound_default),
-                        selected = selectedUri == null,
-                        onClick = { onSelect(null) },
+                        selected = candidateUri == null,
+                        onClick = {
+                            candidateUri = null
+                            previewPlayer.preview(context, AlarmSounds.defaultUri(context))
+                        },
                     )
                 }
                 items(sounds, key = { it.uri }) { sound ->
                     SoundOption(
                         title = sound.title,
-                        selected = selectedUri == sound.uri,
-                        onClick = { onSelect(sound) },
+                        selected = candidateUri == sound.uri,
+                        onClick = {
+                            candidateUri = sound.uri
+                            previewPlayer.preview(context, Uri.parse(sound.uri))
+                        },
                     )
                 }
             }
         },
         confirmButton = {
+            TextButton(onClick = {
+                onSelect(sounds.firstOrNull { it.uri == candidateUri })
+            }) { Text(stringResource(R.string.ok)) }
+        },
+        dismissButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         },
     )

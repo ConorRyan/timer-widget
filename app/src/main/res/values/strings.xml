@@ -11,6 +11,7 @@
     <string name="new_timer">New timer</string>
     <string name="edit_timer">Edit timer</string>
     <string name="save">Save</string>
+    <string name="ok">OK</string>
     <string name="timer_fallback">Timer</string>
     <string name="hours">Hrs</string>
     <string name="minutes">Min</string>

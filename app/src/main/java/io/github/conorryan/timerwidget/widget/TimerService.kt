@@ -37,6 +37,10 @@ class TimerService : Service() {
     ) {
         var finished = false
         val remainingMs: Long get() = (endAtMs - System.currentTimeMillis()).coerceAtLeast(0)
+        val totalSeconds: Int get() = (totalMs / 1000).toInt()
+
+        /** Seconds to show while counting down: one less than the ceiling, so a just-started timer visibly drops from its total. */
+        val displaySeconds: Int get() = (((remainingMs + 999) / 1000).toInt() - 1).coerceAtLeast(0)
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -91,21 +95,28 @@ class TimerService : Service() {
                 endAtMs = System.currentTimeMillis() + def.totalSeconds * 1000L,
                 totalMs = def.totalSeconds * 1000L,
             )
+            notifyWidget(widgetId, active.getValue(widgetId))
             ensureTicker()
         }
     }
 
     private fun clear(widgetId: Int) {
         active.remove(widgetId)
-        scope.launch { TimerWidgetViews.update(applicationContext, widgetId) }
-        stopIfEmpty()
+        // Refresh before stopping: stopping cancels the scope, which would kill this
+        // coroutine mid-render and leave the widget stuck at the paused countdown.
+        scope.launch {
+            TimerWidgetViews.update(applicationContext, widgetId)
+            stopIfEmpty()
+        }
     }
 
     private fun clearAll() {
         val ids = active.keys.toList()
         active.clear()
-        scope.launch { ids.forEach { TimerWidgetViews.update(applicationContext, it) } }
-        stopIfEmpty()
+        scope.launch {
+            ids.forEach { TimerWidgetViews.update(applicationContext, it) }
+            stopIfEmpty()
+        }
     }
 
     private fun stopIfEmpty() {
@@ -142,9 +153,9 @@ class TimerService : Service() {
 
     private fun notifyWidget(widgetId: Int, entry: Active) {
         val time = if (entry.finished) {
-            getString(R.string.widget_done)
+            formatHms(entry.totalSeconds)
         } else {
-            formatHms(((entry.remainingMs + 999) / 1000).toInt())
+            formatHms(entry.displaySeconds)
         }
         val views = TimerWidgetViews.build(
             applicationContext,
@@ -160,7 +171,7 @@ class TimerService : Service() {
         val (title, text) = if (running == null) {
             getString(R.string.timer_done_title) to (active.values.firstOrNull()?.name ?: "")
         } else {
-            running.name to formatHms(((running.remainingMs + 999) / 1000).toInt())
+            running.name to formatHms(running.displaySeconds)
         }
         val cancel = PendingIntent.getService(
             this,

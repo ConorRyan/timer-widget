@@ -19,7 +19,6 @@
     <string name="config_no_timers">No timers yet. Open the app and create one first.</string>
     <string name="no_timer">No timer</string>
     <string name="configure_hint">Tap to choose</string>
-    <string name="widget_done">Done</string>
     <string name="timer_done_title">Timer finished</string>
     <string name="cancel">Cancel</string>
     <string name="channel_timer">Running timers</string>

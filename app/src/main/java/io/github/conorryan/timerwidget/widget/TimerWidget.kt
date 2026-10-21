@@ -53,8 +53,8 @@ object TimerWidgetViews {
     fun build(context: Context, widgetId: Int, def: TimerDef?): RemoteViews {
         val entry = TimerService.active[widgetId]
         val time = when {
-            entry?.finished == true -> context.getString(R.string.widget_done)
-            entry != null -> formatHms(((entry.remainingMs + 999) / 1000).toInt())
+            entry?.finished == true -> formatHms(entry.totalSeconds)
+            entry != null -> formatHms(entry.displaySeconds)
             def != null -> formatHms(def.totalSeconds)
             else -> context.getString(R.string.configure_hint)
         }

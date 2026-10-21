@@ -4,40 +4,48 @@ This file lists the third-party libraries used by TimerWidget and their
 licenses. The project itself is released under the MIT License (see
 [LICENSE](LICENSE)).
 
+The runtime and debug libraries below are compiled into the distributed APK.
+
 ## Runtime dependencies
 
-These libraries are compiled into the distributed APK. All are licensed
-under the Apache License, Version 2.0 (full text below).
-
-| Library | Artifact |
-|---|---|
-| AndroidX Core KTX | `androidx.core:core-ktx` |
-| AndroidX Activity Compose | `androidx.activity:activity-compose` |
-| AndroidX Lifecycle Runtime Compose | `androidx.lifecycle:lifecycle-runtime-compose` |
-| AndroidX Lifecycle ViewModel Compose | `androidx.lifecycle:lifecycle-viewmodel-compose` |
-| AndroidX DataStore Preferences | `androidx.datastore:datastore-preferences` |
-| AndroidX Compose UI | `androidx.compose.ui:ui` |
-| AndroidX Compose UI Graphics | `androidx.compose.ui:ui-graphics` |
-| AndroidX Compose UI Tooling Preview | `androidx.compose.ui:ui-tooling-preview` |
-| AndroidX Compose Material 3 | `androidx.compose.material3:material3` |
-| AndroidX Compose Material Icons Extended | `androidx.compose.material:material-icons-extended` |
-| Kotlin Serialization JSON | `org.jetbrains.kotlinx:kotlinx-serialization-json` |
-| Kotlin Coroutines Android | `org.jetbrains.kotlinx:kotlinx-coroutines-android` |
-| Kotlin Standard Library | `org.jetbrains.kotlin:kotlin-stdlib` |
-
-The Compose libraries are resolved through the
+Direct dependencies. The Compose libraries are resolved through the
 `androidx.compose:compose-bom` bill of materials.
+
+| Library | Artifact | License |
+|---|---|---|
+| AndroidX Core KTX | `androidx.core:core-ktx` | Apache License 2.0 |
+| AndroidX Activity Compose | `androidx.activity:activity-compose` | Apache License 2.0 |
+| AndroidX Lifecycle Runtime Compose | `androidx.lifecycle:lifecycle-runtime-compose` | Apache License 2.0 |
+| AndroidX Lifecycle ViewModel Compose | `androidx.lifecycle:lifecycle-viewmodel-compose` | Apache License 2.0 |
+| AndroidX Compose UI | `androidx.compose.ui:ui` | Apache License 2.0 |
+| AndroidX Compose UI Graphics | `androidx.compose.ui:ui-graphics` | Apache License 2.0 |
+| AndroidX Compose UI Tooling Preview | `androidx.compose.ui:ui-tooling-preview` | Apache License 2.0 |
+| AndroidX Compose Material 3 | `androidx.compose.material3:material3` | Apache License 2.0 |
+| AndroidX Compose Material Icons Extended | `androidx.compose.material:material-icons-extended` | Apache License 2.0 |
+| AndroidX DataStore Preferences | `androidx.datastore:datastore-preferences` | Apache License 2.0 |
+| Kotlin Serialization JSON | `org.jetbrains.kotlinx:kotlinx-serialization-json` | Apache License 2.0 |
+| Kotlin Coroutines Android | `org.jetbrains.kotlinx:kotlinx-coroutines-android` | Apache License 2.0 |
+
+Notable transitive dependencies:
+
+| Library | Artifact | License |
+|---|---|---|
+| Okio (via DataStore) | `com.squareup.okio:okio` | Apache License 2.0 |
+| Kotlin Standard Library | `org.jetbrains.kotlin:kotlin-stdlib` | Apache License 2.0 |
+| DataStore Preferences External Protobuf | `androidx.datastore:datastore-preferences-external-protobuf` | BSD 3-Clause (full text below) |
 
 Source code for AndroidX libraries: https://android.googlesource.com/platform/frameworks/support
 Source code for kotlinx libraries: https://github.com/JetBrains/kotlin
+Source code for Okio: https://github.com/square/okio
 
 ## Debug-only dependencies
 
-Bundled only in debug builds, not in release APKs.
+Bundled only in debug builds, not in release APKs. All are licensed under
+the Apache License, Version 2.0.
 
 | Library | Artifact |
 |---|---|
-| AndroidX Compose UI Tooling | `androidx.compose.ui:ui-tooling` | 
+| AndroidX Compose UI Tooling | `androidx.compose.ui:ui-tooling` |
 
 ## Test-only dependencies
 
@@ -49,6 +57,38 @@ Used for unit tests only; not distributed with the app.
 | Robolectric | `org.robolectric:robolectric` | Apache License 2.0 |
 | AndroidX Test Core KTX | `androidx.test:core-ktx` | Apache License 2.0 |
 
+## BSD 3-Clause License
+
+The DataStore Preferences External Protobuf library is licensed under a
+BSD 3-Clause License:
+
+```
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+    * Neither the name of the copyright holder nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+```
 ## Apache License, Version 2.0
 
 The runtime and debug libraries listed above are licensed under the

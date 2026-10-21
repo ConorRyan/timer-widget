@@ -85,7 +85,7 @@ class TimerService : Service() {
                 ?: run { stopIfEmpty(); return@launch }
             active[widgetId] = Active(
                 timerId = timerId,
-                name = def.name.ifBlank { getString(R.string.app_name) },
+                name = def.name.ifBlank { getString(R.string.timer_fallback) },
                 endAtMs = System.currentTimeMillis() + def.totalSeconds * 1000L,
                 totalMs = def.totalSeconds * 1000L,
             )

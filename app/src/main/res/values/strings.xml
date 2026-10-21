@@ -4,6 +4,10 @@
     <string name="add_timer">Add timer</string>
     <string name="delete_timer">Delete timer</string>
     <string name="timer_name">Name</string>
+    <string name="new_timer">New timer</string>
+    <string name="edit_timer">Edit timer</string>
+    <string name="save">Save</string>
+    <string name="timer_fallback">Timer</string>
     <string name="hours">Hrs</string>
     <string name="minutes">Min</string>
     <string name="seconds">Sec</string>

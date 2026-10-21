@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 class TimerViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -29,15 +28,7 @@ class TimerViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun add() = mutate { list ->
-        list += TimerDef(
-            id = UUID.randomUUID().toString(),
-            name = "Timer ${list.size + 1}",
-            hours = 0,
-            minutes = 5,
-            seconds = 0,
-        )
-    }
+    fun add(def: TimerDef) = mutate { list -> list += def }
 
     fun update(def: TimerDef) = mutate { list ->
         val index = list.indexOfFirst { it.id == def.id }

@@ -102,7 +102,7 @@ private fun ConfigScreen(store: TimerStore, onPick: (TimerDef) -> Unit) {
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(timer.name.ifBlank { stringResource(R.string.app_name) })
+                            Text(timer.name.ifBlank { stringResource(R.string.timer_fallback) })
                             Text(
                                 formatHms(timer.totalSeconds),
                                 style = MaterialTheme.typography.titleMedium,

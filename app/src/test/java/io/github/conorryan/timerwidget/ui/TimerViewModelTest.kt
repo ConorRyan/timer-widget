@@ -24,7 +24,7 @@ class TimerViewModelTest {
     @Test
     fun editIsVisibleImmediatelyInUiState() {
         withCollectedStates { vm, states ->
-            vm.add()
+            vm.add(TimerDef("t1", "Tea", 0, 2, 30))
             awaitUntil { states.isNotEmpty() && states.last().isNotEmpty() }
 
             val timer = states.last().last()
@@ -40,7 +40,7 @@ class TimerViewModelTest {
     @Test
     fun removalIsVisibleImmediatelyInUiState() {
         withCollectedStates { vm, states ->
-            vm.add()
+            vm.add(TimerDef("t1", "Tea", 0, 2, 30))
             awaitUntil { states.isNotEmpty() && states.last().isNotEmpty() }
 
             val timer = states.last().last()

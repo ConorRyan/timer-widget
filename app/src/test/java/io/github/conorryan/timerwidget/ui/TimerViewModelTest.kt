@@ -3,6 +3,7 @@ package io.github.conorryan.timerwidget.ui
 import android.app.Application
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
+import androidx.lifecycle.ViewModelProvider
 import io.github.conorryan.timerwidget.data.TimerDef
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -71,6 +72,31 @@ class TimerViewModelTest {
             assertEquals("content://media/internal/audio/media/42", updated.soundUri)
             assertEquals("Cesium", updated.soundName)
         }
+    }
+
+    @Test
+    fun androidViewModelFactoryCreatesViewModelWithDefaultArgs() {
+        // MainActivity gets the ViewModel via viewModel(), which reflects for
+        // an <init>(Application) constructor. A second constructor parameter
+        // without @JvmOverloads removes that constructor and crashes on open.
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val vm = ViewModelProvider.AndroidViewModelFactory(app).create(TimerViewModel::class.java)
+        assertEquals(app, vm.getApplication())
+    }
+
+    @Test
+    fun everyMutationRefreshesWidgets() {
+        val refreshed = CopyOnWriteArrayList<Application>()
+        val vm = TimerViewModel(ApplicationProvider.getApplicationContext()) { refreshed.add(it) }
+
+        vm.add(TimerDef("t-refresh", "Tea", 0, 2, 30))
+        awaitUntil { refreshed.isNotEmpty() }
+
+        vm.update(TimerDef("t-refresh", "Tea", 0, 3, 0))
+        awaitUntil { refreshed.size >= 2 }
+
+        vm.remove("t-refresh")
+        awaitUntil { refreshed.size >= 3 }
     }
 
     private fun withCollectedStates(block: (TimerViewModel, CopyOnWriteArrayList<List<TimerDef>>) -> Unit) {

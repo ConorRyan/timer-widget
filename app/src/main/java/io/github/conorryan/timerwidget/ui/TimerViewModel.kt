@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.conorryan.timerwidget.data.TimerDef
 import io.github.conorryan.timerwidget.data.TimerStore
+import io.github.conorryan.timerwidget.widget.TimerWidgetViews
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,7 +13,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class TimerViewModel(app: Application) : AndroidViewModel(app) {
+class TimerViewModel @JvmOverloads constructor(
+    app: Application,
+    /** Injectable so tests can observe widget refreshes without AppWidgetManager. */
+    private val refreshWidgets: suspend (Application) -> Unit = { application ->
+        TimerWidgetViews.refreshAll(application)
+    },
+) : AndroidViewModel(app) {
 
     private val store = TimerStore(app)
 
@@ -52,6 +59,7 @@ class TimerViewModel(app: Application) : AndroidViewModel(app) {
                 next
             }
             store.save(next)
+            refreshWidgets(getApplication())
         }
     }
 }

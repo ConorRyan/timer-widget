@@ -3,6 +3,7 @@ package io.github.conorryan.timerwidget.widget
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
@@ -43,6 +44,18 @@ object TimerWidgetViews {
         val def = WidgetPrefs.timerIdFor(context, widgetId)
             ?.let { TimerStore(context).timerById(it) }
         update(context, widgetId, def)
+    }
+
+    /**
+     * Re-renders every installed instance of [TimerWidget] from current data.
+     * Called after timer edits so a widget's emoji/name/time changes show up
+     * without needing a tap; running timers keep their live countdowns
+     * ([build] prefers the running entry over the stored definition).
+     */
+    suspend fun refreshAll(context: Context) {
+        val manager = AppWidgetManager.getInstance(context)
+        val ids = manager.getAppWidgetIds(ComponentName(context, TimerWidget::class.java))
+        ids.forEach { update(context, it) }
     }
 
     fun update(context: Context, widgetId: Int, def: TimerDef?) {

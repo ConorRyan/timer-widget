@@ -36,13 +36,9 @@ class TimerStore(private val context: Context) {
 
     suspend fun timerById(id: String): TimerDef? = timers.first().find { it.id == id }
 
-    suspend fun mutate(transform: (MutableList<TimerDef>) -> Unit) {
+    suspend fun save(list: List<TimerDef>) {
         context.timerDataStore.edit { prefs ->
-            val list = (prefs[KEY]?.let { raw ->
-                runCatching { json.decodeFromString<List<TimerDef>>(raw) }.getOrNull()
-            } ?: emptyList()).toMutableList()
-            transform(list)
-            prefs[KEY] = json.encodeToString(list.toList())
+            prefs[KEY] = json.encodeToString(list)
         }
     }
 

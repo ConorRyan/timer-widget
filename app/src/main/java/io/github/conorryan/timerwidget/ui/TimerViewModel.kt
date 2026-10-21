@@ -5,9 +5,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.conorryan.timerwidget.data.TimerDef
 import io.github.conorryan.timerwidget.data.TimerStore
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -15,35 +17,50 @@ class TimerViewModel(app: Application) : AndroidViewModel(app) {
 
     private val store = TimerStore(app)
 
-    val timers: StateFlow<List<TimerDef>> = store.timers
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    private val loaded = CompletableDeferred<Unit>()
 
-    fun add() {
+    private val _timers = MutableStateFlow<List<TimerDef>>(emptyList())
+    val timers = _timers.asStateFlow()
+
+    init {
         viewModelScope.launch {
-            store.mutate { list ->
-                list += TimerDef(
-                    id = UUID.randomUUID().toString(),
-                    name = "Timer ${list.size + 1}",
-                    hours = 0,
-                    minutes = 5,
-                    seconds = 0,
-                )
-            }
+            _timers.value = store.timers.first()
+            loaded.complete(Unit)
         }
     }
 
-    fun update(def: TimerDef) {
-        viewModelScope.launch {
-            store.mutate { list ->
-                val index = list.indexOfFirst { it.id == def.id }
-                if (index >= 0) list[index] = def
-            }
-        }
+    fun add() = mutate { list ->
+        list += TimerDef(
+            id = UUID.randomUUID().toString(),
+            name = "Timer ${list.size + 1}",
+            hours = 0,
+            minutes = 5,
+            seconds = 0,
+        )
     }
 
-    fun remove(id: String) {
+    fun update(def: TimerDef) = mutate { list ->
+        val index = list.indexOfFirst { it.id == def.id }
+        if (index >= 0) list[index] = def
+    }
+
+    fun remove(id: String) = mutate { list -> list.removeAll { it.id == id } }
+
+    /**
+     * Applies [transform] to the in-memory UI state synchronously on the
+     * caller's frame, then persists the resulting list in the background.
+     * The UI state must never wait on the DataStore round trip: a TextField
+     * bound to state that lags behind keystrokes reverts typed characters.
+     */
+    private fun mutate(transform: (MutableList<TimerDef>) -> Unit) {
         viewModelScope.launch {
-            store.mutate { list -> list.removeAll { it.id == id } }
+            loaded.await()
+            var next: List<TimerDef> = emptyList()
+            _timers.update { current ->
+                next = current.toMutableList().also(transform)
+                next
+            }
+            store.save(next)
         }
     }
 }

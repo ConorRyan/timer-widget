@@ -50,6 +50,29 @@ class TimerViewModelTest {
         }
     }
 
+    @Test
+    fun soundSurvivesEditsToOtherFields() {
+        // The DataStore delegate is a singleton shared across tests in one JVM run,
+        // so look this test's timer up by id instead of relying on list position.
+        withCollectedStates { vm, states ->
+            vm.add(
+                TimerDef(
+                    "t-sound", "Tea", 0, 2, 30,
+                    soundUri = "content://media/internal/audio/media/42",
+                    soundName = "Cesium",
+                ),
+            )
+            awaitUntil { states.isNotEmpty() && states.last().any { it.id == "t-sound" } }
+
+            vm.update(states.last().last { it.id == "t-sound" }.copy(minutes = 3))
+            awaitUntil { states.last().last { it.id == "t-sound" }.minutes == 3 }
+
+            val updated = states.last().last { it.id == "t-sound" }
+            assertEquals("content://media/internal/audio/media/42", updated.soundUri)
+            assertEquals("Cesium", updated.soundName)
+        }
+    }
+
     private fun withCollectedStates(block: (TimerViewModel, CopyOnWriteArrayList<List<TimerDef>>) -> Unit) {
         val vm = TimerViewModel(ApplicationProvider.getApplicationContext<Application>())
         val states = CopyOnWriteArrayList<List<TimerDef>>()

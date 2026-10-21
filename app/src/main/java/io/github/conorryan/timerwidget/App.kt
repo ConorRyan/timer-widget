@@ -44,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,6 +52,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.conorryan.timerwidget.data.TimerDef
 import io.github.conorryan.timerwidget.ui.TimerViewModel
 import io.github.conorryan.timerwidget.ui.TimerWidgetTheme
+import io.github.conorryan.timerwidget.util.AlarmSound
+import io.github.conorryan.timerwidget.util.AlarmSounds
 import io.github.conorryan.timerwidget.util.formatHms
 import java.util.UUID
 
@@ -159,6 +162,11 @@ private fun TimerDialog(
     var hours by remember { mutableStateOf(initial?.hours ?: 0) }
     var minutes by remember { mutableStateOf(initial?.minutes ?: 5) }
     var seconds by remember { mutableStateOf(initial?.seconds ?: 0) }
+    var soundUri by remember { mutableStateOf(initial?.soundUri) }
+    var soundName by remember { mutableStateOf(initial?.soundName) }
+    var pickingSound by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val sounds = remember { AlarmSounds.available(context) }
     val titleRes = if (initial == null) R.string.new_timer else R.string.edit_timer
 
     AlertDialog(
@@ -225,6 +233,24 @@ private fun TimerDialog(
                         modifier = Modifier.weight(1f),
                     ) { seconds = it }
                 }
+                Text(
+                    stringResource(R.string.timer_sound),
+                    style = MaterialTheme.typography.labelMedium,
+                )
+                Text(
+                    soundName ?: stringResource(R.string.timer_sound_default),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(4.dp))
+                        .border(
+                            1.dp,
+                            MaterialTheme.colorScheme.outline,
+                            RoundedCornerShape(4.dp),
+                        )
+                        .clickable { pickingSound = true }
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
             }
         },
         confirmButton = {
@@ -239,6 +265,8 @@ private fun TimerDialog(
                             minutes = minutes,
                             seconds = seconds,
                             emoji = emoji,
+                            soundUri = soundUri,
+                            soundName = soundName,
                         ),
                     )
                 },
@@ -246,6 +274,74 @@ private fun TimerDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+        },
+    )
+
+    if (pickingSound) {
+        SoundPickerDialog(
+            sounds = sounds,
+            selectedUri = soundUri,
+            onSelect = { sound ->
+                soundUri = sound?.uri
+                soundName = sound?.title
+                pickingSound = false
+            },
+            onDismiss = { pickingSound = false },
+        )
+    }
+}
+
+@Composable
+private fun SoundPickerDialog(
+    sounds: List<AlarmSound>,
+    selectedUri: String?,
+    onSelect: (AlarmSound?) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.timer_sound)) },
+        text = {
+            LazyColumn {
+                item {
+                    SoundOption(
+                        title = stringResource(R.string.timer_sound_default),
+                        selected = selectedUri == null,
+                        onClick = { onSelect(null) },
+                    )
+                }
+                items(sounds, key = { it.uri }) { sound ->
+                    SoundOption(
+                        title = sound.title,
+                        selected = selectedUri == sound.uri,
+                        onClick = { onSelect(sound) },
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+        },
+    )
+}
+
+@Composable
+private fun SoundOption(title: String, selected: Boolean, onClick: () -> Unit) {
+    Text(
+        title,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(4.dp))
+            .background(
+                if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        style = MaterialTheme.typography.bodyMedium,
+        color = if (selected) {
+            MaterialTheme.colorScheme.onPrimaryContainer
+        } else {
+            MaterialTheme.colorScheme.onSurface
         },
     )
 }

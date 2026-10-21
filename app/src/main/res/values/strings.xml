@@ -6,6 +6,8 @@
     <string name="timer_name">Name</string>
     <string name="timer_emoji">Emoji</string>
     <string name="timer_time">Time</string>
+    <string name="timer_sound">Alarm sound</string>
+    <string name="timer_sound_default">Default</string>
     <string name="new_timer">New timer</string>
     <string name="edit_timer">Edit timer</string>
     <string name="save">Save</string>
@@ -23,4 +25,5 @@
     <string name="cancel">Cancel</string>
     <string name="channel_timer">Running timers</string>
     <string name="channel_alarm">Timer finished</string>
+    <string name="stop_alarm">Stop</string>
 </resources>

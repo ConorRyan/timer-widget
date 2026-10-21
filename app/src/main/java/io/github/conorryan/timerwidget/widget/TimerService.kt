@@ -9,10 +9,8 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
-import android.media.AudioAttributes
 import android.os.Build
 import android.os.IBinder
-import android.media.RingtoneManager
 import androidx.core.app.NotificationCompat
 import io.github.conorryan.timerwidget.MainActivity
 import io.github.conorryan.timerwidget.R
@@ -34,6 +32,8 @@ class TimerService : Service() {
         val emoji: String,
         val endAtMs: Long,
         val totalMs: Long,
+        val soundUri: String? = null,
+        val soundName: String? = null,
     ) {
         var finished = false
         val remainingMs: Long get() = (endAtMs - System.currentTimeMillis()).coerceAtLeast(0)
@@ -45,6 +45,9 @@ class TimerService : Service() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var ticker: kotlinx.coroutines.Job? = null
+
+    /** Widget whose alarm last finished; its ring is shown in the foreground slot. */
+    private var lastFinishedWidgetId: Int? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -61,12 +64,14 @@ class TimerService : Service() {
                 else -> start(widgetId)
             }
             ACTION_CLEAR_ALL -> clearAll()
+            ACTION_STOP_ALARM -> stopAlarm(widgetId)
             else -> stopIfEmpty()
         }
         return START_NOT_STICKY
     }
 
     override fun onDestroy() {
+        alarmPlayer.stopAll()
         scope.cancel()
         super.onDestroy()
     }
@@ -94,6 +99,8 @@ class TimerService : Service() {
                 emoji = def.emoji,
                 endAtMs = System.currentTimeMillis() + def.totalSeconds * 1000L,
                 totalMs = def.totalSeconds * 1000L,
+                soundUri = def.soundUri,
+                soundName = def.soundName,
             )
             notifyWidget(widgetId, active.getValue(widgetId))
             ensureTicker()
@@ -102,6 +109,8 @@ class TimerService : Service() {
 
     private fun clear(widgetId: Int) {
         active.remove(widgetId)
+        if (lastFinishedWidgetId == widgetId) lastFinishedWidgetId = null
+        alarmPlayer.stop(widgetId)
         // Refresh before stopping: stopping cancels the scope, which would kill this
         // coroutine mid-render and leave the widget stuck at the paused countdown.
         scope.launch {
@@ -113,10 +122,29 @@ class TimerService : Service() {
     private fun clearAll() {
         val ids = active.keys.toList()
         active.clear()
+        lastFinishedWidgetId = null
+        alarmPlayer.stopAll()
         scope.launch {
             ids.forEach { TimerWidgetViews.update(applicationContext, it) }
             stopIfEmpty()
         }
+    }
+
+    /**
+     * Silences a ringing alarm, dismisses its notification, and clears the
+     * finished timer. Without the clear, the stale entry in [active] makes the
+     * next widget tap toggle the leftover off instead of starting a new run.
+     */
+    private fun stopAlarm(widgetId: Int) {
+        alarmPlayer.stop(widgetId)
+        if (widgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
+            stopIfEmpty()
+            return
+        }
+        runCatching {
+            getSystemService(NotificationManager::class.java)?.cancel(ALARM_NOTIF_BASE + widgetId)
+        }
+        clear(widgetId)
     }
 
     private fun stopIfEmpty() {
@@ -147,7 +175,9 @@ class TimerService : Service() {
 
     private fun finishTimer(widgetId: Int, entry: Active) {
         entry.finished = true
+        lastFinishedWidgetId = widgetId
         notifyWidget(widgetId, entry)
+        alarmPlayer.start(applicationContext, widgetId, entry.soundUri)
         postAlarmNotification(widgetId, entry)
     }
 
@@ -168,6 +198,19 @@ class TimerService : Service() {
 
     private fun foregroundNotification(): Notification {
         val running = active.values.filter { !it.finished }.minByOrNull { it.endAtMs }
+        if (running == null) {
+            // Nothing counts down anymore: the foreground slot shows the ringing
+            // alarm instead, so the finished timer is a single notification.
+            // The service must stay foreground while the ring plays, and a
+            // foreground service needs a notification to occupy that slot.
+            val alarmId = lastFinishedWidgetId
+            if (alarmId != null) {
+                val ringing = active[alarmId]?.takeIf { it.finished }
+                if (ringing != null) {
+                    return alarmNotification(alarmId, ringing, ongoing = true)
+                }
+            }
+        }
         val (title, text) = if (running == null) {
             getString(R.string.timer_done_title) to (active.values.firstOrNull()?.name ?: "")
         } else {
@@ -204,34 +247,59 @@ class TimerService : Service() {
     }
 
     private fun postAlarmNotification(widgetId: Int, entry: Active) {
+        if (active.values.none { !it.finished }) {
+            // No countdown left to show: the foreground notification is the
+            // alarm, so re-render it rather than post a duplicate.
+            updateForegroundNotification()
+            return
+        }
+        runCatching {
+            getSystemService(NotificationManager::class.java)
+                ?.notify(ALARM_NOTIF_BASE + widgetId, alarmNotification(widgetId, entry, ongoing = false))
+        }
+    }
+
+    private fun alarmNotification(widgetId: Int, entry: Active, ongoing: Boolean): Notification {
+        val stop = PendingIntent.getService(
+            this,
+            widgetId,
+            Intent(this, TimerService::class.java)
+                .setAction(ACTION_STOP_ALARM)
+                .putExtra(EXTRA_WIDGET_ID, widgetId),
+            PendingIntent.FLAG_IMMUTABLE,
+        )
         val openApp = PendingIntent.getActivity(
             this,
             widgetId,
             Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_IMMUTABLE,
         )
-        val notification = NotificationCompat.Builder(this, CHANNEL_ALARM)
+        return NotificationCompat.Builder(this, CHANNEL_ALARM_QUIET)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle(getString(R.string.timer_done_title))
             .setContentText(entry.name)
             .setContentIntent(openApp)
-            .setAutoCancel(true)
+            // The ring plays via AlarmPlayer; every dismissal path must stop it.
+            .setDeleteIntent(stop)
+            .addAction(0, getString(R.string.stop_alarm), stop)
+            .setOngoing(ongoing)
+            .setAutoCancel(!ongoing)
+            .setOnlyAlertOnce(true)
             .build()
-        runCatching {
-            getSystemService(NotificationManager::class.java)?.notify(ALARM_NOTIF_BASE + widgetId, notification)
-        }
     }
 
     companion object {
         const val ACTION_TOGGLE = "io.github.conorryan.timerwidget.action.TOGGLE"
         const val ACTION_CLEAR_ALL = "io.github.conorryan.timerwidget.action.CLEAR_ALL"
+        const val ACTION_STOP_ALARM = "io.github.conorryan.timerwidget.action.STOP_ALARM"
         const val EXTRA_WIDGET_ID = "widgetId"
         const val NOTIF_ID = 1
         const val ALARM_NOTIF_BASE = 1000
         const val CHANNEL_TIMER = "timer"
-        const val CHANNEL_ALARM = "timer_alarm"
+        const val CHANNEL_ALARM_QUIET = "timer_alarm_quiet"
 
         val active = ConcurrentHashMap<Int, Active>()
+        val alarmPlayer = AlarmPlayer()
 
         fun ensureChannels(context: Context) {
             val nm = context.getSystemService(NotificationManager::class.java) ?: return
@@ -244,19 +312,20 @@ class TimerService : Service() {
                     ),
                 )
             }
-            if (nm.getNotificationChannel(CHANNEL_ALARM) == null) {
+            // Legacy alarm channels carried their sound on the channel, which was
+            // unreliable; the ring is now played by AlarmPlayer. A channel's sound
+            // is immutable, so delete them instead of leaving dead categories
+            // (or double sounds) in system settings.
+            nm.notificationChannels
+                .filter { it.id != CHANNEL_ALARM_QUIET && it.id.startsWith("timer_alarm") }
+                .forEach { nm.deleteNotificationChannel(it.id) }
+            if (nm.getNotificationChannel(CHANNEL_ALARM_QUIET) == null) {
                 val channel = NotificationChannel(
-                    CHANNEL_ALARM,
+                    CHANNEL_ALARM_QUIET,
                     context.getString(R.string.channel_alarm),
                     NotificationManager.IMPORTANCE_HIGH,
                 )
-                channel.setSound(
-                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_ALARM)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .build(),
-                )
+                channel.setSound(null, null)
                 channel.enableVibration(true)
                 nm.createNotificationChannel(channel)
             }

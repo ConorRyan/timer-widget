@@ -53,19 +53,22 @@ Home-screen widgets (per-widget live countdown)
 
 | Component | Path | Role |
 |---|---|---|
-| `TimerDef` / `TimerStore` | `data/Timers.kt` | Serializable timer model; persists the timer list as one JSON string in DataStore Preferences (`timers` store, key `timers_json`). Corrupt data decodes to an empty list. |
+| `TimerDef` / `TimerStore` | `data/Timers.kt` | Serializable timer model (incl. picked alarm ringtone URI + title); persists the timer list as one JSON string in DataStore Preferences (`timers` store, key `timers_json`). Corrupt data decodes to an empty list. |
 | `TimerViewModel` | `ui/TimerViewModel.kt` | Owns UI state. Applies mutations to the in-memory list first (so bound TextFields never lag), then persists in the background. |
-| `MainActivity` / `App.kt` | root | Compose list of timers with add/edit `AlertDialog` (name, emoji picker, h/m/s fields); requests `POST_NOTIFICATIONS` on API 33+. |
+| `MainActivity` / `App.kt` | root | Compose list of timers with add/edit `AlertDialog` (name, emoji picker, h/m/s fields, alarm-sound picker fed by `AlarmSounds`); requests `POST_NOTIFICATIONS` on API 33+. |
 | `TimerWidget` / `TimerWidgetViews` | `widget/TimerWidget.kt` | `AppWidgetProvider`; `onUpdate` renders each widget via `TimerWidgetViews.update` (async with `goAsync`). Widget tap = toggle `PendingIntent` to `TimerService`; unconfigured widget tap opens the app. |
-| `TimerService` | `widget/TimerService.kt` | Special-use foreground service. Static `active: ConcurrentHashMap<widgetId, Active>` holds running timers (end time computed from wall clock, so it survives process churn within a session). One shared ticker job fires each second: updates every widget's `RemoteViews` and the foreground notification, and posts an alarm notification (alarm sound + vibration) when a timer finishes. Service stops itself when no timers are active. |
+| `TimerService` | `widget/TimerService.kt` | Special-use foreground service. Static `active: ConcurrentHashMap<widgetId, Active>` holds running timers (end time computed from wall clock, so it survives process churn within a session). One shared ticker job fires each second: updates every widget's `RemoteViews` and the foreground notification, and plays the alarm (via `AlarmPlayer`) when a timer finishes. When no timer is left counting down, the foreground notification itself becomes the alarm (single notification, Stop action, `timer_alarm_quiet` channel); a separate swipeable alarm notification is posted only while other timers still run. Alarm channels: a single silent `timer_alarm_quiet` channel (IMPORTANCE_HIGH); legacy sound-bearing channels are deleted in `ensureChannels`, since channel sound proved unreliable (one-shot, notification-stream routing on some OEMs, unplayable URIs → silence). Stopping an alarm (notification Stop action / delete intent) clears the finished entry, so the next widget tap starts a new run instead of toggling a leftover off. Service stops itself when no timers are active. |
+| `AlarmPlayer` | `widget/AlarmPlayer.kt` | Owns alarm playback: a looping `MediaPlayer` per widget on the alarm audio stream (`USAGE_ALARM`), started when a timer finishes and stopped on every dismissal path (notification delete intent, "Stop" action, widget toggle-off, Clear All, service destroy). Falls back from the per-timer tone to the system default alarm tone if the picked tone is unplayable. |
 | `TimerWidgetConfig` | `widget/TimerWidgetConfig.kt` | Widget configure/reconfigure activity: pick which timer a widget controls, stores the mapping in `WidgetPrefs`, returns `RESULT_OK`. |
 | `WidgetPrefs` | `widget/WidgetPrefs.kt` | SharedPreferences (`widgets` file) mapping `widget_<id>` -> timer ID; cleared in `onDeleted`. |
 | `formatHms` | `util/Format.kt` | `m:ss` / `h:mm:ss` formatting used by app, widget, and notifications. |
+| `AlarmSound` / `AlarmSounds` | `util/AlarmSounds.kt` | Enumerates the device's preloaded alarm ringtones via `RingtoneManager` for the per-timer sound picker. |
 
 ### Tests
 
-JUnit + Robolectric under `app/src/test/`: `TimerDefTest` (model), 
-`TimerViewModelTest` (state transitions), `FormatHmsTest` (formatting). Run with
+JUnit + Robolectric under `app/src/test/`: `TimerDefTest` (model),
+`TimerViewModelTest` (state transitions), `FormatHmsTest` (formatting),
+`AlarmPlayerTest` (playback + fallback). Run with
 `./gradlew testDebugUnitTest`.
 
 ### Notable invariants

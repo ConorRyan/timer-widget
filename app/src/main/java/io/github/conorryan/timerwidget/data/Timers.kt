@@ -20,6 +20,10 @@ data class TimerDef(
     val minutes: Int,
     val seconds: Int,
     val emoji: String = "",
+    /** Content-provider URI of the alarm ringtone to play, or null for the device default. */
+    val soundUri: String? = null,
+    /** Ringtone title for display; null when soundUri is null. */
+    val soundName: String? = null,
 ) {
     val totalSeconds: Int get() = hours * 3600 + minutes * 60 + seconds
 

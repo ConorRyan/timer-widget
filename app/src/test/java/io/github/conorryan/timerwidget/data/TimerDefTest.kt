@@ -21,6 +21,29 @@ class TimerDefTest {
     }
 
     @Test
+    fun jsonRoundTripWithSound() {
+        val json = Json { ignoreUnknownKeys = true }
+        val def = TimerDef(
+            "abc", "Tea", 0, 2, 30,
+            emoji = "🍵",
+            soundUri = "content://media/internal/audio/media/42",
+            soundName = "Cesium",
+        )
+        val decoded = json.decodeFromString<TimerDef>(json.encodeToString(def))
+        assertEquals(def, decoded)
+    }
+
+    @Test
+    fun soundDefaultsToNullWhenMissingFromJson() {
+        val json = Json { ignoreUnknownKeys = true }
+        val decoded = json.decodeFromString<TimerDef>(
+            """{"id":"abc","name":"Tea","hours":0,"minutes":2,"seconds":30}""",
+        )
+        assertEquals(null, decoded.soundUri)
+        assertEquals(null, decoded.soundName)
+    }
+
+    @Test
     fun ignoresUnknownFields() {
         val json = Json { ignoreUnknownKeys = true }
         val decoded = json.decodeFromString<TimerDef>(

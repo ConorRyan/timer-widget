@@ -1,4 +1,4 @@
-package com.conorryan.timerwidget.ui
+package io.github.conorryan.timerwidget.ui
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

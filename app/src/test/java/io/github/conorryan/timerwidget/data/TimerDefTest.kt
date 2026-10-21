@@ -1,4 +1,4 @@
-package com.conorryan.timerwidget.data
+package io.github.conorryan.timerwidget.data
 
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals

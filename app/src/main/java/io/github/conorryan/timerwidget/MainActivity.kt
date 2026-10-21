@@ -1,4 +1,4 @@
-package com.conorryan.timerwidget
+package io.github.conorryan.timerwidget
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -12,8 +12,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.conorryan.timerwidget.ui.TimerViewModel
-import com.conorryan.timerwidget.ui.TimerWidgetTheme
+import io.github.conorryan.timerwidget.ui.TimerViewModel
+import io.github.conorryan.timerwidget.ui.TimerWidgetTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -1,4 +1,4 @@
-package com.conorryan.timerwidget.widget
+package io.github.conorryan.timerwidget.widget
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -14,10 +14,10 @@ import android.os.Build
 import android.os.IBinder
 import android.media.RingtoneManager
 import androidx.core.app.NotificationCompat
-import com.conorryan.timerwidget.MainActivity
-import com.conorryan.timerwidget.R
-import com.conorryan.timerwidget.data.TimerStore
-import com.conorryan.timerwidget.util.formatHms
+import io.github.conorryan.timerwidget.MainActivity
+import io.github.conorryan.timerwidget.R
+import io.github.conorryan.timerwidget.data.TimerStore
+import io.github.conorryan.timerwidget.util.formatHms
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -210,8 +210,8 @@ class TimerService : Service() {
     }
 
     companion object {
-        const val ACTION_TOGGLE = "com.conorryan.timerwidget.action.TOGGLE"
-        const val ACTION_CLEAR_ALL = "com.conorryan.timerwidget.action.CLEAR_ALL"
+        const val ACTION_TOGGLE = "io.github.conorryan.timerwidget.action.TOGGLE"
+        const val ACTION_CLEAR_ALL = "io.github.conorryan.timerwidget.action.CLEAR_ALL"
         const val EXTRA_WIDGET_ID = "widgetId"
         const val NOTIF_ID = 1
         const val ALARM_NOTIF_BASE = 1000

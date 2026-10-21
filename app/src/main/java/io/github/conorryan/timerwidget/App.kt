@@ -1,4 +1,4 @@
-package com.conorryan.timerwidget
+package io.github.conorryan.timerwidget
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,9 +35,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.conorryan.timerwidget.data.TimerDef
-import com.conorryan.timerwidget.ui.TimerViewModel
-import com.conorryan.timerwidget.ui.TimerWidgetTheme
+import io.github.conorryan.timerwidget.data.TimerDef
+import io.github.conorryan.timerwidget.ui.TimerViewModel
+import io.github.conorryan.timerwidget.ui.TimerWidgetTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

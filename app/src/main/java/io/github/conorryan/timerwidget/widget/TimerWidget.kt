@@ -1,4 +1,4 @@
-package com.conorryan.timerwidget.widget
+package io.github.conorryan.timerwidget.widget
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -6,11 +6,11 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
-import com.conorryan.timerwidget.MainActivity
-import com.conorryan.timerwidget.R
-import com.conorryan.timerwidget.data.TimerDef
-import com.conorryan.timerwidget.data.TimerStore
-import com.conorryan.timerwidget.util.formatHms
+import io.github.conorryan.timerwidget.MainActivity
+import io.github.conorryan.timerwidget.R
+import io.github.conorryan.timerwidget.data.TimerDef
+import io.github.conorryan.timerwidget.data.TimerStore
+import io.github.conorryan.timerwidget.util.formatHms
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -1,4 +1,4 @@
-package com.conorryan.timerwidget.data
+package io.github.conorryan.timerwidget.data
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit

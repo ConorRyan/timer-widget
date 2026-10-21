@@ -1,4 +1,4 @@
-package com.conorryan.timerwidget.widget
+package io.github.conorryan.timerwidget.widget
 
 import android.content.Context
 

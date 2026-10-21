@@ -1,4 +1,4 @@
-package com.conorryan.timerwidget.util
+package io.github.conorryan.timerwidget.util
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

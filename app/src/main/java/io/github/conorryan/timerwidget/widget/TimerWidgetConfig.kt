@@ -1,4 +1,4 @@
-package com.conorryan.timerwidget.widget
+package io.github.conorryan.timerwidget.widget
 
 import android.appwidget.AppWidgetManager
 import android.content.Intent
@@ -26,11 +26,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.conorryan.timerwidget.R
-import com.conorryan.timerwidget.data.TimerDef
-import com.conorryan.timerwidget.data.TimerStore
-import com.conorryan.timerwidget.ui.TimerWidgetTheme
-import com.conorryan.timerwidget.util.formatHms
+import io.github.conorryan.timerwidget.R
+import io.github.conorryan.timerwidget.data.TimerDef
+import io.github.conorryan.timerwidget.data.TimerStore
+import io.github.conorryan.timerwidget.ui.TimerWidgetTheme
+import io.github.conorryan.timerwidget.util.formatHms
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

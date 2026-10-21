@@ -1,10 +1,10 @@
-package com.conorryan.timerwidget.ui
+package io.github.conorryan.timerwidget.ui
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.conorryan.timerwidget.data.TimerDef
-import com.conorryan.timerwidget.data.TimerStore
+import io.github.conorryan.timerwidget.data.TimerDef
+import io.github.conorryan.timerwidget.data.TimerStore
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn

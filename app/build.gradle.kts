@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.conorryan.timerwidget"
+    namespace = "io.github.conorryan.timerwidget"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.conorryan.timerwidget"
+        applicationId = "io.github.conorryan.timerwidget"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

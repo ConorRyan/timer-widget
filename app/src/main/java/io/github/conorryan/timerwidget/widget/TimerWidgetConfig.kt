@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -90,6 +91,7 @@ private fun ConfigScreen(store: TimerStore, onPick: (TimerDef) -> Unit) {
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(timers, key = { it.id }) { timer ->
@@ -102,7 +104,10 @@ private fun ConfigScreen(store: TimerStore, onPick: (TimerDef) -> Unit) {
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(timer.name.ifBlank { stringResource(R.string.timer_fallback) })
+                            Text(
+                                timer.emoji.takeIf { it.isNotBlank() }?.let { "$it " }.orEmpty() +
+                                    timer.name.ifBlank { stringResource(R.string.timer_fallback) },
+                            )
                             Text(
                                 formatHms(timer.totalSeconds),
                                 style = MaterialTheme.typography.titleMedium,

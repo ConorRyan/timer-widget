@@ -4,6 +4,8 @@
     <string name="add_timer">Add timer</string>
     <string name="delete_timer">Delete timer</string>
     <string name="timer_name">Name</string>
+    <string name="timer_emoji">Emoji</string>
+    <string name="timer_time">Time</string>
     <string name="new_timer">New timer</string>
     <string name="edit_timer">Edit timer</string>
     <string name="save">Save</string>

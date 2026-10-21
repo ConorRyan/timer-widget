@@ -1,14 +1,22 @@
 package io.github.conorryan.timerwidget
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -32,10 +40,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.conorryan.timerwidget.data.TimerDef
 import io.github.conorryan.timerwidget.ui.TimerViewModel
@@ -121,7 +132,8 @@ private fun TimerCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    timer.name.ifBlank { stringResource(R.string.timer_fallback) },
+                    timer.emoji.takeIf { it.isNotBlank() }?.let { "$it " }.orEmpty() +
+                        timer.name.ifBlank { stringResource(R.string.timer_fallback) },
                     style = MaterialTheme.typography.bodyLarge,
                 )
                 Text(
@@ -143,6 +155,7 @@ private fun TimerDialog(
     onSave: (TimerDef) -> Unit,
 ) {
     var name by remember { mutableStateOf(initial?.name.orEmpty()) }
+    var emoji by remember { mutableStateOf(initial?.emoji.orEmpty()) }
     var hours by remember { mutableStateOf(initial?.hours ?: 0) }
     var minutes by remember { mutableStateOf(initial?.minutes ?: 5) }
     var seconds by remember { mutableStateOf(initial?.seconds ?: 0) }
@@ -153,12 +166,44 @@ private fun TimerDialog(
         title = { Text(stringResource(titleRes)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    stringResource(R.string.timer_emoji),
+                    style = MaterialTheme.typography.labelMedium,
+                )
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(6),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(
+                            1.dp,
+                            MaterialTheme.colorScheme.outline,
+                            RoundedCornerShape(4.dp),
+                        )
+                        .padding(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    items(TIMER_EMOJIS) { candidate ->
+                        EmojiOption(
+                            emoji = candidate,
+                            selected = emoji == candidate,
+                            onClick = { emoji = candidate },
+                        )
+                    }
+                }
+                Text(
+                    stringResource(R.string.timer_name),
+                    style = MaterialTheme.typography.labelMedium,
+                )
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it.take(40) },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text(stringResource(R.string.timer_name)) },
                     singleLine = true,
+                )
+                Text(
+                    stringResource(R.string.timer_time),
+                    style = MaterialTheme.typography.labelMedium,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     NumberField(
@@ -183,22 +228,43 @@ private fun TimerDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = {
-                onSave(
-                    TimerDef(
-                        id = initial?.id ?: UUID.randomUUID().toString(),
-                        name = name,
-                        hours = hours,
-                        minutes = minutes,
-                        seconds = seconds,
-                    ),
-                )
-            }) { Text(stringResource(R.string.save)) }
+            TextButton(
+                enabled = emoji.isNotBlank(),
+                onClick = {
+                    onSave(
+                        TimerDef(
+                            id = initial?.id ?: UUID.randomUUID().toString(),
+                            name = name,
+                            hours = hours,
+                            minutes = minutes,
+                            seconds = seconds,
+                            emoji = emoji,
+                        ),
+                    )
+                },
+            ) { Text(stringResource(R.string.save)) }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         },
     )
+}
+
+@Composable
+private fun EmojiOption(emoji: String, selected: Boolean, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(1f)
+            .clip(RoundedCornerShape(4.dp))
+            .background(
+                if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(emoji, fontSize = 22.sp)
+    }
 }
 
 @Composable
@@ -226,6 +292,14 @@ private fun NumberField(
         singleLine = true,
     )
 }
+
+private val TIMER_EMOJIS = listOf(
+    "⏰", "⏳", "⏱️", "🔔", "🍵", "☕",
+    "🍜", "🍳", "🥚", "🍕", "🥗", "🍰",
+    "🦷", "🛁", "🚿", "🧘", "🏃", "🏋️",
+    "📚", "🎧", "🎮", "🧹", "🧺", "🌱",
+    "💊", "🛒", "🚗", "✈️", "📞", "💤",
+)
 
 @Preview(showBackground = true)
 @Composable

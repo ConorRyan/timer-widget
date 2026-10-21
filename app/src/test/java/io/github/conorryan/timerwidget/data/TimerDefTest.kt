@@ -15,7 +15,7 @@ class TimerDefTest {
     @Test
     fun jsonRoundTrip() {
         val json = Json { ignoreUnknownKeys = true }
-        val def = TimerDef("abc", "Tea", 0, 2, 30)
+        val def = TimerDef("abc", "Tea", 0, 2, 30, emoji = "🍵")
         val decoded = json.decodeFromString<TimerDef>(json.encodeToString(def))
         assertEquals(def, decoded)
     }
@@ -27,5 +27,21 @@ class TimerDefTest {
             """{"id":"abc","name":"Tea","hours":0,"minutes":2,"seconds":30,"extra":1}""",
         )
         assertTrue(decoded.totalSeconds == 150)
+    }
+
+    @Test
+    fun emojiDefaultsToBlankWhenMissingFromJson() {
+        val json = Json { ignoreUnknownKeys = true }
+        val decoded = json.decodeFromString<TimerDef>(
+            """{"id":"abc","name":"Tea","hours":0,"minutes":2,"seconds":30}""",
+        )
+        assertEquals("", decoded.emoji)
+    }
+
+    @Test
+    fun labelPrefersEmojiThenNameThenFallback() {
+        assertEquals("⏳", TimerDef("a", "Tea", 0, 0, 10, emoji = "⏳").label("Timer"))
+        assertEquals("Tea", TimerDef("a", "Tea", 0, 0, 10).label("Timer"))
+        assertEquals("Timer", TimerDef("a", "", 0, 0, 10).label("Timer"))
     }
 }

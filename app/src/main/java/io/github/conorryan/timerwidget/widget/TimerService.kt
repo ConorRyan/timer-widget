@@ -31,6 +31,7 @@ class TimerService : Service() {
     class Active(
         val timerId: String,
         val name: String,
+        val emoji: String,
         val endAtMs: Long,
         val totalMs: Long,
     ) {
@@ -86,6 +87,7 @@ class TimerService : Service() {
             active[widgetId] = Active(
                 timerId = timerId,
                 name = def.name.ifBlank { getString(R.string.timer_fallback) },
+                emoji = def.emoji,
                 endAtMs = System.currentTimeMillis() + def.totalSeconds * 1000L,
                 totalMs = def.totalSeconds * 1000L,
             )
@@ -146,7 +148,7 @@ class TimerService : Service() {
         }
         val views = TimerWidgetViews.build(
             applicationContext,
-            name = entry.name,
+            name = entry.emoji.ifBlank { entry.name },
             time = time,
             click = TimerWidgetViews.togglePendingIntent(applicationContext, widgetId),
         )

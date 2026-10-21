@@ -19,8 +19,12 @@ data class TimerDef(
     val hours: Int,
     val minutes: Int,
     val seconds: Int,
+    val emoji: String = "",
 ) {
     val totalSeconds: Int get() = hours * 3600 + minutes * 60 + seconds
+
+    /** What the widget shows: the timer's emoji, falling back to its name. */
+    fun label(fallback: String): String = emoji.ifBlank { name.ifBlank { fallback } }
 }
 
 class TimerStore(private val context: Context) {

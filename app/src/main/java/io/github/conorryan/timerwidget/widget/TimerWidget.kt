@@ -58,7 +58,7 @@ object TimerWidgetViews {
             def != null -> formatHms(def.totalSeconds)
             else -> context.getString(R.string.configure_hint)
         }
-        val name = def?.name?.ifBlank { context.getString(R.string.app_name) }
+        val name = def?.label(context.getString(R.string.app_name))
             ?: context.getString(R.string.no_timer)
         val click = if (def == null) {
             openAppPendingIntent(context, widgetId)

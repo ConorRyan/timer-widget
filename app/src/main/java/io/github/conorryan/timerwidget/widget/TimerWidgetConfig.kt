@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -75,43 +76,48 @@ class TimerWidgetConfig : ComponentActivity() {
 @Composable
 private fun ConfigScreen(store: TimerStore, onPick: (TimerDef) -> Unit) {
     val timers by store.timers.collectAsState(initial = emptyList())
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(title = { Text(stringResource(R.string.widget_config_title)) })
-        if (timers.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    stringResource(R.string.config_no_timers),
-                    modifier = Modifier.padding(24.dp),
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                items(timers, key = { it.id }) { timer ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                        onClick = { onPick(timer) },
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            TopAppBar(title = { Text(stringResource(R.string.widget_config_title)) })
+            if (timers.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        stringResource(R.string.config_no_timers),
+                        modifier = Modifier.padding(24.dp),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(timers, key = { it.id }) { timer ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                            onClick = { onPick(timer) },
                         ) {
-                            Text(
-                                timer.emoji.takeIf { it.isNotBlank() }?.let { "$it " }.orEmpty() +
-                                    timer.name.ifBlank { stringResource(R.string.timer_fallback) },
-                            )
-                            Text(
-                                formatHms(timer.totalSeconds),
-                                style = MaterialTheme.typography.titleMedium,
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    timer.emoji.takeIf { it.isNotBlank() }?.let { "$it " }.orEmpty() +
+                                        timer.name.ifBlank { stringResource(R.string.timer_fallback) },
+                                )
+                                Text(
+                                    formatHms(timer.totalSeconds),
+                                    style = MaterialTheme.typography.titleMedium,
+                                )
+                            }
                         }
                     }
                 }

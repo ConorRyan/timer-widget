@@ -5,6 +5,7 @@
     <string name="delete_timer">Delete timer</string>
     <string name="timer_name">Name</string>
     <string name="timer_emoji">Emoji</string>
+    <string name="timer_emoji_hint">✎</string>
     <string name="timer_time">Time</string>
     <string name="timer_sound">Alarm sound</string>
     <string name="timer_sound_default">Default</string>

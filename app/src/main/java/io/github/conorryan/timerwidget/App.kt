@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -44,9 +45,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -57,6 +61,7 @@ import io.github.conorryan.timerwidget.ui.TimerWidgetTheme
 import io.github.conorryan.timerwidget.util.AlarmSound
 import io.github.conorryan.timerwidget.util.AlarmSounds
 import io.github.conorryan.timerwidget.util.SoundPreviewPlayer
+import io.github.conorryan.timerwidget.util.firstGrapheme
 import io.github.conorryan.timerwidget.util.formatHms
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -177,6 +182,11 @@ private fun TimerDialog(
 ) {
     var name by remember { mutableStateOf(initial?.name.orEmpty()) }
     var emoji by remember { mutableStateOf(initial?.emoji.orEmpty()) }
+    var customEmoji by remember {
+        mutableStateOf(
+            initial?.emoji?.takeIf { it.isNotBlank() && it !in TIMER_EMOJIS }.orEmpty(),
+        )
+    }
     var hours by remember { mutableStateOf(initial?.hours ?: 0) }
     var minutes by remember { mutableStateOf(initial?.minutes ?: 5) }
     var seconds by remember { mutableStateOf(initial?.seconds ?: 0) }
@@ -212,6 +222,15 @@ private fun TimerDialog(
                             emoji = candidate,
                             selected = emoji == candidate,
                             onClick = { emoji = candidate },
+                        )
+                    }
+                    item {
+                        EmojiEntry(
+                            value = customEmoji,
+                            onValueChange = { input ->
+                                customEmoji = firstGrapheme(input)
+                                emoji = customEmoji
+                            },
                         )
                     }
                 }
@@ -400,6 +419,42 @@ private fun EmojiOption(emoji: String, selected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
+private fun EmojiEntry(value: String, onValueChange: (String) -> Unit) {
+    var focused by remember { mutableStateOf(false) }
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(1f)
+            .clip(RoundedCornerShape(4.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp)),
+        contentAlignment = Alignment.Center,
+    ) {
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { focused = it.isFocused },
+            textStyle = TextStyle(
+                color = Color.White,
+                fontSize = 22.sp,
+                textAlign = TextAlign.Center,
+            ),
+            singleLine = true,
+            cursorBrush = SolidColor(if (focused) Color.White else Color.Transparent),
+            decorationBox = { innerTextField ->
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    if (value.isBlank() && !focused) {
+                        Text(stringResource(R.string.timer_emoji_hint), fontSize = 22.sp)
+                    }
+                    innerTextField()
+                }
+            },
+        )
+    }
+}
+
+@Composable
 private fun NumberField(
     value: Int,
     range: IntRange,
@@ -430,7 +485,7 @@ private val TIMER_EMOJIS = listOf(
     "🍜", "🍳", "🥚", "🍕", "🥗", "🍰",
     "🦷", "🛁", "🚿", "🧘", "🏃", "🏋️",
     "📚", "🎧", "🎮", "🧹", "🧺", "🌱",
-    "💊", "🛒", "🚗", "✈️", "📞", "💤",
+    "💊", "🛒", "🚗", "✈️", "📞",
 )
 
 @Preview(showBackground = true)

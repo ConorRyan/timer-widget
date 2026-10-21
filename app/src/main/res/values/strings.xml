@@ -1,4 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Timer Widget</string>
+    <string name="add_timer">Add timer</string>
+    <string name="delete_timer">Delete timer</string>
+    <string name="timer_name">Name</string>
+    <string name="hours">Hrs</string>
+    <string name="minutes">Min</string>
+    <string name="seconds">Sec</string>
+    <string name="no_timers_hint">No timers yet. Tap + to add one.</string>
+    <string name="widget_label">Timer</string>
+    <string name="widget_config_title">Choose a timer</string>
+    <string name="config_no_timers">No timers yet. Open the app and create one first.</string>
+    <string name="no_timer">No timer</string>
+    <string name="configure_hint">Tap to choose</string>
+    <string name="widget_done">Done</string>
+    <string name="timer_done_title">Timer finished</string>
+    <string name="cancel">Cancel</string>
+    <string name="channel_timer">Running timers</string>
+    <string name="channel_alarm">Timer finished</string>
 </resources>

@@ -58,6 +58,8 @@ import io.github.conorryan.timerwidget.util.AlarmSound
 import io.github.conorryan.timerwidget.util.AlarmSounds
 import io.github.conorryan.timerwidget.util.SoundPreviewPlayer
 import io.github.conorryan.timerwidget.util.formatHms
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,6 +69,16 @@ fun App(viewModel: TimerViewModel) {
     var editingId by remember { mutableStateOf<String?>(null) }
     var creating by remember { mutableStateOf(false) }
     val editing = editingId?.let { id -> timers.find { it.id == id } }
+    val context = LocalContext.current
+
+    // The RingtoneManager cursor query can take a second; run it off the main
+    // thread once at app open so opening the edit dialog never blocks.
+    var alarmSounds by remember { mutableStateOf<List<AlarmSound>>(emptyList()) }
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            alarmSounds = AlarmSounds.available(context.applicationContext)
+        }
+    }
 
     Scaffold(
         topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) },
@@ -103,6 +115,7 @@ fun App(viewModel: TimerViewModel) {
     if (creating) {
         TimerDialog(
             initial = null,
+            sounds = alarmSounds,
             onDismiss = { creating = false },
             onSave = { def ->
                 creating = false
@@ -113,6 +126,7 @@ fun App(viewModel: TimerViewModel) {
     editing?.let { timer ->
         TimerDialog(
             initial = timer,
+            sounds = alarmSounds,
             onDismiss = { editingId = null },
             onSave = { def ->
                 editingId = null
@@ -157,6 +171,7 @@ private fun TimerCard(
 @Composable
 private fun TimerDialog(
     initial: TimerDef?,
+    sounds: List<AlarmSound>,
     onDismiss: () -> Unit,
     onSave: (TimerDef) -> Unit,
 ) {
@@ -168,8 +183,6 @@ private fun TimerDialog(
     var soundUri by remember { mutableStateOf(initial?.soundUri) }
     var soundName by remember { mutableStateOf(initial?.soundName) }
     var pickingSound by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-    val sounds = remember { AlarmSounds.available(context) }
     val titleRes = if (initial == null) R.string.new_timer else R.string.edit_timer
 
     AlertDialog(

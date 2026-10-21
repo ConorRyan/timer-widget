@@ -52,6 +52,12 @@ class TimerService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // The widget tap arrives via PendingIntent.getForegroundService, which
+        // obligates the service to startForeground on EVERY delivery — also the
+        // ones that stop or clear a timer — or the system raises
+        // RemoteServiceException.
+        ensureChannels(applicationContext)
+        startForegroundCompat()
         val widgetId = intent?.getIntExtra(
             EXTRA_WIDGET_ID,
             AppWidgetManager.INVALID_APPWIDGET_ID,
@@ -77,17 +83,7 @@ class TimerService : Service() {
     }
 
     private fun start(widgetId: Int) {
-        ensureChannels(applicationContext)
-        val type = if (Build.VERSION.SDK_INT >= 34) {
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
-        } else {
-            0
-        }
-        if (type != 0) {
-            startForeground(NOTIF_ID, foregroundNotification(), type)
-        } else {
-            startForeground(NOTIF_ID, foregroundNotification())
-        }
+        startForegroundCompat()
         scope.launch {
             val timerId = WidgetPrefs.timerIdFor(applicationContext, widgetId)
                 ?: run { stopIfEmpty(); return@launch }
@@ -194,6 +190,19 @@ class TimerService : Service() {
             click = TimerWidgetViews.togglePendingIntent(applicationContext, widgetId),
         )
         AppWidgetManager.getInstance(applicationContext).updateAppWidget(widgetId, views)
+    }
+
+    private fun startForegroundCompat() {
+        val type = if (Build.VERSION.SDK_INT >= 34) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+        } else {
+            0
+        }
+        if (type != 0) {
+            startForeground(NOTIF_ID, foregroundNotification(), type)
+        } else {
+            startForeground(NOTIF_ID, foregroundNotification())
+        }
     }
 
     private fun foregroundNotification(): Notification {

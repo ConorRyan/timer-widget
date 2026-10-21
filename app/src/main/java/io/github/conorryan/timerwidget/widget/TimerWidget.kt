@@ -83,11 +83,16 @@ object TimerWidgetViews {
         setOnClickPendingIntent(R.id.widget_root, click)
     }
 
+    // Must be a foreground-service PendingIntent: when the app has been force
+    // closed it counts as background, and the system rejects a plain
+    // startService dispatch ("Background start not allowed"). The launcher is
+    // visible, so a foreground-service start is exempt from the background
+    // FGS restrictions and works even with the process dead.
     fun togglePendingIntent(context: Context, widgetId: Int): PendingIntent {
         val intent = Intent(context, TimerService::class.java)
             .setAction(TimerService.ACTION_TOGGLE)
             .putExtra(TimerService.EXTRA_WIDGET_ID, widgetId)
-        return PendingIntent.getService(context, widgetId, intent, PendingIntent.FLAG_IMMUTABLE)
+        return PendingIntent.getForegroundService(context, widgetId, intent, PendingIntent.FLAG_IMMUTABLE)
     }
 
     private fun openAppPendingIntent(context: Context, widgetId: Int): PendingIntent {

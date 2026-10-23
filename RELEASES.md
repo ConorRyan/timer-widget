@@ -73,30 +73,31 @@ the release keystore exists, and the fdroiddata recipe has
    `timer-widget.<versionName>.apk` as a release asset. The filename must
    match the `Binaries:` pattern exactly: `timer-widget.<versionName>.apk`.
 
-7. **Extract the signature files** into fdroiddata:
-
-   ```bash
-   apksigcopier extract timer-widget.<versionName>.apk \
-     <fdroiddata>/metadata/io.github.conorryan.timerwidget/signatures/<versionCode>/
-   ```
-
-8. **fdroiddata update MR.** The checkupdates bot notices the new tag within
+7. **fdroiddata update MR.** The checkupdates bot notices the new tag within
    a day and opens an update MR (that is `AutoUpdateMode: Version` +
-   `UpdateCheckMode: Tags` working). Contribute the new
-   `signatures/<versionCode>/` files to that MR - the bot cannot generate
-   them. If the bot is slow, open the MR yourself: new `Builds:` entry,
-   bumped `CurrentVersion`/`CurrentVersionCode`, and the signature files.
+   `UpdateCheckMode: Tags` working). No extra files are needed from you:
+   `fdroid build` downloads the release asset itself and transplants the
+   signature from it (`Binaries:` + `AllowedAPKSigningKeys`). If the bot is
+   slow, open the MR yourself: new `Builds:` entry and bumped
+   `CurrentVersion`/`CurrentVersionCode`.
 
-9. **Optional but recommended: verify locally** before the MR runs. In the
+   Do NOT add `signatures/<versionCode>/` files to fdroiddata: shipping
+   signature files together with `Binaries:` makes the fdroiddata CI run a
+   publish step that fails (`reference binary missing` - the build leaves
+   the reference in `tmp/binaries/`, publish looks in
+   `unsigned/binaries/`). `Binaries:` + `AllowedAPKSigningKeys` alone is
+   the working setup (that is how Podcini.A does it).
+
+8. **Optional but recommended: verify locally** before the MR runs. In the
    fdroiddata clone (with the release asset already uploaded):
 
    ```bash
-   fdroid publish io.github.conorryan.timerwidget
+   fdroid build io.github.conorryan.timerwidget
    ```
 
-   This downloads your reference APK, rebuilds from source, and checks the
-   two are byte-identical before applying the signature - the same check the
-   MR pipeline runs.
+   This rebuilds from source, downloads your reference APK, and checks the
+   two are byte-identical before applying the signature - the same check
+   the MR pipeline runs.
 
 ## Notes
 

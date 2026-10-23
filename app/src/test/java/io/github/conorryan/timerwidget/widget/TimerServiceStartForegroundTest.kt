@@ -16,8 +16,8 @@ import org.robolectric.annotation.Config
 
 /**
  * The widget tap is dispatched with [android.app.PendingIntent.getForegroundService], so
- * every delivered command must call startForeground before doing anything else — including
- * the commands that only stop or clear timers — or the system raises
+ * every delivered command must call startForeground before doing anything else - including
+ * the commands that only stop or clear timers - or the system raises
  * RemoteServiceException ("did not then call Service.startForeground").
  */
 @RunWith(RobolectricTestRunner::class)

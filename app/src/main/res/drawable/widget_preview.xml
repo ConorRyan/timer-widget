@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Static preview shown by launchers that don't render previewLayout
+     (pre-Android 12): the widget tile with the app's clock glyph. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#1F1D5D"
+        android:pathData="M0,24 A24,24 0 0 1 24,0 H84 A24,24 0 0 1 108,24 V84 A24,24 0 0 1 84,108 H24 A24,24 0 0 1 0,84 Z" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="6"
+        android:pathData="M54,32 A26,26 0 0 1 54,84 A26,26 0 0 1 54,32 Z" />
+    <path
+        android:fillColor="#F6863C"
+        android:pathData="M54,58 L54,39 A19,19 0 1 1 35,58 Z" />
+</vector>

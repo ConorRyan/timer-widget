@@ -5,6 +5,8 @@ import android.content.Context
 import android.graphics.drawable.RippleDrawable
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
 import io.github.conorryan.timerwidget.R
 import org.junit.Assert.assertEquals
@@ -48,12 +50,31 @@ class TimerWidgetViewsTest {
         )
         assertEquals(
             "widget background must be the logo navy",
-            0xFF10213F.toInt(),
+            0xFF1F1D5D.toInt(),
             (background as RippleDrawable)
                 .findDrawableByLayerId(android.R.id.background)
                 .let { shape ->
                     (shape as android.graphics.drawable.GradientDrawable).color?.defaultColor
                 },
+        )
+    }
+
+    @Test
+    fun pickerPreviewShowsSampleContent() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+
+        val root =
+            LayoutInflater.from(context).inflate(R.layout.timer_widget, null) as ViewGroup
+
+        val name = root.findViewById<TextView>(R.id.timer_name)
+        val time = root.findViewById<TextView>(R.id.timer_time)
+        assertTrue(
+            "the widget picker preview must show a sample name",
+            name.text.isNotBlank(),
+        )
+        assertTrue(
+            "the widget picker preview must show a sample countdown",
+            time.text.isNotBlank(),
         )
     }
 }

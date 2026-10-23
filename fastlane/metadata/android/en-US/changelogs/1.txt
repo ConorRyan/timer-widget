@@ -1,0 +1,2 @@
+Initial release: named countdown timers as home-screen widgets, live
+per-second countdowns, alarm notifications with per-timer sound picker.

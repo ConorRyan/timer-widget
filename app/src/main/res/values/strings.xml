@@ -28,4 +28,6 @@
     <string name="channel_timer">Running timers</string>
     <string name="channel_alarm">Timer finished</string>
     <string name="stop_alarm">Stop</string>
+    <string name="widget_preview_name">⏳</string>
+    <string name="widget_preview_time">3:00</string>
 </resources>

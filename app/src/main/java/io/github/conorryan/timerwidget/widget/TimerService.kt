@@ -53,8 +53,8 @@ class TimerService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         // The widget tap arrives via PendingIntent.getForegroundService, which
-        // obligates the service to startForeground on EVERY delivery — also the
-        // ones that stop or clear a timer — or the system raises
+        // obligates the service to startForeground on EVERY delivery - also the
+        // ones that stop or clear a timer - or the system raises
         // RemoteServiceException.
         ensureChannels(applicationContext)
         startForegroundCompat()

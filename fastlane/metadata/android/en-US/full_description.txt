@@ -1,0 +1,19 @@
+Start a preset countdown in one tap, straight from your home screen.
+
+Define named timers in the app - each with a name, optional emoji, and
+duration - then place one or more 1x1 widgets on your home screen, one
+per timer. Tap a widget to start its countdown; tap again to cancel.
+
+If you regularly time the same things - brewing tea, a parking meter,
+laundry, a short break - this is the fastest way to start that
+countdown: set the duration once, then one tap every time after that.
+
+Timers are stored locally on the device. No network access, no ads, no
+analytics, no trackers.
+
+Features:
+
+- Multiple timers, each with a name, emoji, and duration
+- One 1x1 home-screen widget per timer; tap to start, tap again to cancel
+- No app to open: timers start and cancel from the widget itself
+- Per-timer alarm sound picker

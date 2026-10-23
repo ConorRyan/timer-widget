@@ -1,0 +1,24 @@
+Démarrez un compte à rebours préréglé d'un seul appui, directement depuis
+votre écran d'accueil.
+
+Définissez des minuteurs nommés dans l'application - chacun avec un nom, un
+émoji facultatif et une durée - puis placez un ou plusieurs widgets 1x1 sur
+votre écran d'accueil, un par minuteur. Appuyez sur un widget pour lancer
+son compte à rebours ; appuyez à nouveau pour l'annuler.
+
+Si vous chronométrez régulièrement les mêmes choses - infuser un thé, un
+parcmètre, la lessive, une courte pause - c'est la façon la plus rapide de
+lancer ce compte à rebours : réglez la durée une fois, puis un seul appui
+à chaque fois.
+
+Les minuteurs sont stockés localement sur l'appareil. Aucun accès réseau,
+aucune publicité, aucune analyse, aucun traceur.
+
+Fonctionnalités :
+
+- Plusieurs minuteurs, chacun avec un nom, un émoji et une durée
+- Un widget 1x1 par minuteur sur l'écran d'accueil ; un appui pour lancer,
+  un appui pour annuler
+- Aucune application à ouvrir : les minuteurs se lancent et s'annulent
+  depuis le widget
+- Sélecteur de sonnerie d'alarme par minuteur

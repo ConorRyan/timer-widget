@@ -1,0 +1,3 @@
+Version initiale : minuteurs nommés sous forme de widgets d'écran d'accueil,
+comptes à rebours en direct à la seconde, notifications d'alarme avec choix de
+la sonnerie par minuteur.

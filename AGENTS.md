@@ -23,6 +23,9 @@
 - Build with `./gradlew assembleDebug`; release with `./gradlew assembleRelease`.
   Requires JDK 21 and Android SDK platform 37. Run
   `./gradlew testDebugUnitTest` before finishing a change.
+  Debug builds install as `<applicationId>.debug` ("… Debug" in the
+  launcher, `app/src/debug/res/`), beside the release-signed app; target
+  that package in adb. Never sign debug builds with the release key.
 - Match the existing style: Kotlin, Compose for UI, coroutines for async work,
   small files grouped by package (`data`, `ui`, `util`, `widget`). 4-space
   indent, trailing commas, explicit types only where the codebase already

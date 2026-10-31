@@ -1,0 +1,2 @@
+Widget background now matches the new dark green launcher icon, in both light
+and dark mode and in the launcher's widget preview.

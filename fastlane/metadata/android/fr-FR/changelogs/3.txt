@@ -1,0 +1,2 @@
+L'arrière-plan du widget adopte désormais le vert foncé de la nouvelle icône de
+lancement, en mode clair comme en mode sombre et dans l'aperçu du widget.

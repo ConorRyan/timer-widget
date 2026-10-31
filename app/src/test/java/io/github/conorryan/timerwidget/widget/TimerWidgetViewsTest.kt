@@ -49,8 +49,8 @@ class TimerWidgetViewsTest {
             background is RippleDrawable,
         )
         assertEquals(
-            "widget background must be the logo navy",
-            0xFF1F1D5D.toInt(),
+            "widget background must be the logo dark green",
+            0xFF0F3B2E.toInt(),
             (background as RippleDrawable)
                 .findDrawableByLayerId(android.R.id.background)
                 .let { shape ->

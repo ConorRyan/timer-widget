@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug builds only: the release icon with a "D" badge in the middle, the countdown wedge cut back around it. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:strokeColor="#F2EFE6"
+        android:strokeWidth="5.5"
+        android:pathData="M44,30 H64 A14,14 0 0 1 78,44 V64 A14,14 0 0 1 64,78 H44 A14,14 0 0 1 30,64 V44 A14,14 0 0 1 44,30 Z" />
+    <path
+        android:fillColor="#F6863C"
+        android:pathData="M54,40 A14,14 0 1 1 54,68 A14,14 0 1 1 54,40 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M47,45 H52 A9,9 0 0 1 52,63 H47 Z M50.2,48.2 H52 A5.8,5.8 0 0 1 52,59.8 H50.2 Z" />
+</vector>

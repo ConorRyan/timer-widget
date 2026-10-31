@@ -1,0 +1,3 @@
+Nouvelle icône de lancement : une tuile de widget avec un compte à rebours qui
+se vide. Les builds de débogage s'installent à côté de l'application de version,
+avec un badge « D » sur leur icône.

@@ -1,0 +1,2 @@
+New launcher icon: a widget tile with a draining countdown wedge. Debug builds
+now install beside the release app, with a "D" badge on their icon.

@@ -7,8 +7,8 @@ the release keystore exists, and the fdroiddata recipe has
 
 ## Prerequisites (once per machine)
 
-- The release keystore: `~/keystores/timer-widget-release.jks` with its
-  password in `~/keystores/timer-widget-release.password`. Back this up
+- The release keystore: `~/.local/share/keystores/timer-widget-release.jks` with its
+  password in `~/.local/share/keystores/timer-widget-release.password`. Back this up
   offline; losing it breaks updates for every installed user. Never commit
   it to any repo.
 - An fdroiddata clone with fdroidserver installed (e.g. the venv with
@@ -54,8 +54,8 @@ the release keystore exists, and the fdroiddata recipe has
 
    ```bash
    apksigner sign \
-     --ks ~/keystores/timer-widget-release.jks \
-     --ks-pass file:~/keystores/timer-widget-release.password \
+     --ks ~/.local/share/keystores/timer-widget-release.jks \
+     --ks-pass file:~/.local/share/keystores/timer-widget-release.password \
      --ks-key-alias timerwidget \
      --v1-signing-enabled false \
      --alignment-preserved true \

@@ -63,15 +63,14 @@ time formatting: `./gradlew testDebugUnitTest` (same command as above).
 
 ## Making a release
 
-Releases are manual but reproducibly signed: F-Droid rebuilds from the tag
-and, because the build is byte-for-byte deterministic and the signature
-files are published, ships the APK with our own signing key. `versionName`
-must match the tag, and `versionCode` must strictly increase, or F-Droid
-(and Play) will reject the build.
+Releases are manual but reproducibly signed: the APK on the GitHub release
+is built from the tag, the build is byte-for-byte deterministic, and the
+APK is signed with the project's own key (the same key an eventual F-Droid
+publish would carry). `versionName` must match the tag, and `versionCode`
+must strictly increase, or stores will reject the build.
 
-The full runbook - bump, tag, build with fdroidserver, sign, upload,
-extract signatures, and the fdroiddata update MR - is in
-[RELEASES.md](RELEASES.md). The short version:
+The full runbook - bump, changelog, tag, reproducibility check, sign,
+upload - is in [RELEASES.md](RELEASES.md). The short version:
 
 1. Bump `versionName`/`versionCode` and add the fastlane changelog for the
    new `versionCode`.
@@ -81,11 +80,9 @@ extract signatures, and the fdroiddata update MR - is in
    git tag -a v<versionName> -m "Timer Widget <versionName>"
    ```
 
-3. Build the reference APK with `fdroid build`, sign it with the release
-   keystore, and attach it to the GitHub release.
-4. Extract the APK signature files into fdroiddata's
-   `signatures/<versionCode>/` and add them to the update MR (the
-   checkupdates bot files the yml part automatically).
+3. Build the APK with `./gradlew clean assembleRelease` (two clean builds
+   must be byte-identical), sign it with the release keystore, and attach
+   it to the GitHub release.
 
 ## How it works
 

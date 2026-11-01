@@ -1,23 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Timer Widget</string>
-    <string name="add_timer">Add timer</string>
     <string name="delete_timer">Delete timer</string>
     <string name="timer_name">Name</string>
     <string name="timer_emoji">Emoji</string>
     <string name="timer_emoji_hint">✎</string>
-    <string name="timer_time">Time</string>
     <string name="timer_sound">Alarm sound</string>
     <string name="timer_sound_default">Default</string>
     <string name="new_timer">New timer</string>
     <string name="edit_timer">Edit timer</string>
     <string name="save">Save</string>
-    <string name="ok">OK</string>
     <string name="timer_fallback">Timer</string>
     <string name="hours">Hrs</string>
     <string name="minutes">Min</string>
     <string name="seconds">Sec</string>
-    <string name="no_timers_hint">No timers yet. Tap + to add one.</string>
     <string name="widget_label">Timer</string>
     <string name="widget_config_title">Choose a timer</string>
     <string name="config_no_timers">No timers yet. Open the app and create one first.</string>
@@ -30,4 +26,28 @@
     <string name="stop_alarm">Stop</string>
     <string name="widget_preview_name">⏳</string>
     <string name="widget_preview_time">3:00</string>
+    <string name="timers_title">Timers</string>
+    <string name="section_running">Running</string>
+    <string name="section_all">All timers · tap to start</string>
+    <string name="start_timer">Start</string>
+    <string name="stop_timer">Stop</string>
+    <string name="stop_timer_named">Stop %1$s</string>
+    <string name="edit_timer_named">Edit %1$s</string>
+    <string name="run_progress">of %1$s · ends %2$s</string>
+    <string name="run_finished">Time’s up</string>
+    <string name="empty_title">No timers yet</string>
+    <string name="empty_body">Make a timer here, then add a Timer Widget to your home screen. One tap on the widget starts it.</string>
+    <string name="empty_create">Create your first timer</string>
+    <string name="close">Close</string>
+    <string name="wheel_hours">Hours</string>
+    <string name="wheel_minutes">Minutes</string>
+    <string name="wheel_seconds">Seconds</string>
+    <string name="wheel_hint">Scroll a wheel, or tap the highlighted number to type</string>
+    <string name="preset_minutes">%1$d min</string>
+    <string name="emoji_show_all">Show all</string>
+    <string name="emoji_show_fewer">Show fewer</string>
+    <string name="emoji_custom">Type any emoji</string>
+    <string name="sound_hint">Tap a sound to hear it.</string>
+    <string name="sound_playing">Playing preview</string>
+    <string name="use_sound">Use sound</string>
 </resources>

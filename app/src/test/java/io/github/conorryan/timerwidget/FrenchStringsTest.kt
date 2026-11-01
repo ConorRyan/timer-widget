@@ -24,8 +24,9 @@ class FrenchStringsTest {
         val intentionallyShared = setOf(
             "app_name",
             "timer_emoji_hint",
-            "ok",
             "minutes",
+            "wheel_minutes",
+            "preset_minutes",
             "widget_preview_name",
             "widget_preview_time",
         )

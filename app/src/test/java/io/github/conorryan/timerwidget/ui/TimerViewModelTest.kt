@@ -99,6 +99,26 @@ class TimerViewModelTest {
         awaitUntil { refreshed.size >= 3 }
     }
 
+    @Test
+    fun startAndStopRequestsGoToTheService() {
+        val calls = CopyOnWriteArrayList<String>()
+        val control = object : RunControl {
+            override fun toggle(timerId: String) {
+                calls.add("toggle:$timerId")
+            }
+
+            override fun stop(key: Int) {
+                calls.add("stop:$key")
+            }
+        }
+        val vm = TimerViewModel(ApplicationProvider.getApplicationContext(), control) { }
+
+        vm.toggleRun("tea")
+        vm.stopRun(-7)
+
+        assertEquals(listOf("toggle:tea", "stop:-7"), calls)
+    }
+
     private fun withCollectedStates(block: (TimerViewModel, CopyOnWriteArrayList<List<TimerDef>>) -> Unit) {
         val vm = TimerViewModel(ApplicationProvider.getApplicationContext<Application>())
         val states = CopyOnWriteArrayList<List<TimerDef>>()

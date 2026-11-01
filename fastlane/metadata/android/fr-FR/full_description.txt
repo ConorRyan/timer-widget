@@ -21,4 +21,5 @@ Fonctionnalités :
   un appui pour annuler
 - Aucune application à ouvrir : les minuteurs se lancent et s'annulent
   depuis le widget
+- Ou lancez et arrêtez n'importe quel minuteur depuis l'application, sans widget
 - Sélecteur de sonnerie d'alarme par minuteur

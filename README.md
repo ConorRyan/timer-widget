@@ -20,6 +20,7 @@ Features:
 - Multiple timers, each with a name, emoji, and duration
 - One 1x1 home-screen widget per timer; tap to start, tap again to cancel
 - No app to open: timers start and cancel from the widget itself
+- Or start and stop any timer from the app, no widget needed
 - Per-timer alarm sound picker
 
 ## Screenshots

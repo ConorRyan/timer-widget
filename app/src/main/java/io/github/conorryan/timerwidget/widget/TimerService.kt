@@ -12,6 +12,7 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import io.github.conorryan.timerwidget.MainActivity
 import io.github.conorryan.timerwidget.R
 import io.github.conorryan.timerwidget.data.TimerStore
@@ -21,8 +22,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 class TimerService : Service() {
 
@@ -36,11 +42,16 @@ class TimerService : Service() {
         val soundName: String? = null,
     ) {
         var finished = false
-        val remainingMs: Long get() = (endAtMs - System.currentTimeMillis()).coerceAtLeast(0)
+        val remainingMs: Long get() = remainingMsAt(System.currentTimeMillis())
         val totalSeconds: Int get() = (totalMs / 1000).toInt()
 
         /** Seconds to show while counting down: one less than the ceiling, so a just-started timer visibly drops from its total. */
-        val displaySeconds: Int get() = (((remainingMs + 999) / 1000).toInt() - 1).coerceAtLeast(0)
+        val displaySeconds: Int get() = displaySecondsAt(System.currentTimeMillis())
+
+        fun remainingMsAt(nowMs: Long): Long = (endAtMs - nowMs).coerceAtLeast(0)
+
+        fun displaySecondsAt(nowMs: Long): Int =
+            (((remainingMsAt(nowMs) + 999) / 1000).toInt() - 1).coerceAtLeast(0)
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -69,6 +80,9 @@ class TimerService : Service() {
                 TimerService.active.containsKey(widgetId) -> clear(widgetId)
                 else -> start(widgetId)
             }
+            ACTION_TOGGLE_TIMER -> intent.getStringExtra(EXTRA_TIMER_ID)
+                ?.let(::toggleTimer)
+                ?: stopIfEmpty()
             ACTION_CLEAR_ALL -> clearAll()
             ACTION_STOP_ALARM -> stopAlarm(widgetId)
             else -> stopIfEmpty()
@@ -83,34 +97,53 @@ class TimerService : Service() {
     }
 
     private fun start(widgetId: Int) {
-        startForegroundCompat()
         scope.launch {
             val timerId = WidgetPrefs.timerIdFor(applicationContext, widgetId)
                 ?: run { stopIfEmpty(); return@launch }
-            val def = TimerStore(applicationContext).timerById(timerId)
-                ?: run { stopIfEmpty(); return@launch }
-            active[widgetId] = Active(
-                timerId = timerId,
-                name = def.name.ifBlank { getString(R.string.timer_fallback) },
-                emoji = def.emoji,
-                endAtMs = System.currentTimeMillis() + def.totalSeconds * 1000L,
-                totalMs = def.totalSeconds * 1000L,
-                soundUri = def.soundUri,
-                soundName = def.soundName,
-            )
-            notifyWidget(widgetId, active.getValue(widgetId))
-            ensureTicker()
+            startRun(widgetId, timerId)
         }
+    }
+
+    /**
+     * Tap on a timer in the app: stops every run of [timerId] (app- or
+     * widget-started, ringing or not) if there is one, otherwise starts a new
+     * app run under a fresh [isAppRun] key.
+     */
+    private fun toggleTimer(timerId: String) {
+        val keys = active.filterValues { it.timerId == timerId }.keys
+        if (keys.isEmpty()) {
+            scope.launch { startRun(nextAppKey.incrementAndGet(), timerId) }
+        } else {
+            keys.forEach(::stopAlarm)
+        }
+    }
+
+    private suspend fun startRun(key: Int, timerId: String) {
+        val def = TimerStore(applicationContext).timerById(timerId)
+            ?: run { stopIfEmpty(); return }
+        active[key] = Active(
+            timerId = timerId,
+            name = def.name.ifBlank { getString(R.string.timer_fallback) },
+            emoji = def.emoji,
+            endAtMs = System.currentTimeMillis() + def.totalSeconds * 1000L,
+            totalMs = def.totalSeconds * 1000L,
+            soundUri = def.soundUri,
+            soundName = def.soundName,
+        )
+        notifyWidget(key, active.getValue(key))
+        bumpVersion()
+        ensureTicker()
     }
 
     private fun clear(widgetId: Int) {
         active.remove(widgetId)
         if (lastFinishedWidgetId == widgetId) lastFinishedWidgetId = null
         alarmPlayer.stop(widgetId)
+        bumpVersion()
         // Refresh before stopping: stopping cancels the scope, which would kill this
         // coroutine mid-render and leave the widget stuck at the paused countdown.
         scope.launch {
-            TimerWidgetViews.update(applicationContext, widgetId)
+            if (!isAppRun(widgetId)) TimerWidgetViews.update(applicationContext, widgetId)
             stopIfEmpty()
         }
     }
@@ -120,8 +153,9 @@ class TimerService : Service() {
         active.clear()
         lastFinishedWidgetId = null
         alarmPlayer.stopAll()
+        bumpVersion()
         scope.launch {
-            ids.forEach { TimerWidgetViews.update(applicationContext, it) }
+            ids.filterNot(::isAppRun).forEach { TimerWidgetViews.update(applicationContext, it) }
             stopIfEmpty()
         }
     }
@@ -164,6 +198,7 @@ class TimerService : Service() {
                     .filter { !it.value.finished }
                     .forEach { (widgetId, entry) -> notifyWidget(widgetId, entry) }
                 updateForegroundNotification()
+                bumpVersion()
                 delay(1000 - System.currentTimeMillis() % 1000)
             }
         }
@@ -178,6 +213,7 @@ class TimerService : Service() {
     }
 
     private fun notifyWidget(widgetId: Int, entry: Active) {
+        if (isAppRun(widgetId)) return
         val time = if (entry.finished) {
             formatHms(entry.totalSeconds)
         } else {
@@ -307,8 +343,44 @@ class TimerService : Service() {
         const val CHANNEL_TIMER = "timer"
         const val CHANNEL_ALARM_QUIET = "timer_alarm_quiet"
 
+        const val ACTION_TOGGLE_TIMER = "io.github.conorryan.timerwidget.action.TOGGLE_TIMER"
+        const val EXTRA_TIMER_ID = "timerId"
+
+        /**
+         * Running timers by run key: a widget ID (always positive) for widget
+         * taps, or a negative key from [nextAppKey] for runs started in the app.
+         */
         val active = ConcurrentHashMap<Int, Active>()
         val alarmPlayer = AlarmPlayer()
+
+        // Counts up from Int.MIN_VALUE so app keys stay negative and their
+        // alarm notification IDs (ALARM_NOTIF_BASE + key) never meet a widget's.
+        private val nextAppKey = AtomicInteger(Int.MIN_VALUE)
+
+        private val _version = MutableStateFlow(0L)
+
+        /** Bumps whenever [active] changes and on every ticker second, so the app can redraw. */
+        val version: StateFlow<Long> = _version.asStateFlow()
+
+        private fun bumpVersion() = _version.update { it + 1 }
+
+        fun isAppRun(key: Int): Boolean = key < 0
+
+        /** Starts [timerId] from the app, or stops every run of it if one is going. */
+        fun toggleTimer(context: Context, timerId: String) {
+            val intent = Intent(context, TimerService::class.java)
+                .setAction(ACTION_TOGGLE_TIMER)
+                .putExtra(EXTRA_TIMER_ID, timerId)
+            ContextCompat.startForegroundService(context, intent)
+        }
+
+        /** Stops one run (and its alarm, if ringing) by its key in [active]. */
+        fun stopRun(context: Context, key: Int) {
+            val intent = Intent(context, TimerService::class.java)
+                .setAction(ACTION_STOP_ALARM)
+                .putExtra(EXTRA_WIDGET_ID, key)
+            ContextCompat.startForegroundService(context, intent)
+        }
 
         fun ensureChannels(context: Context) {
             val nm = context.getSystemService(NotificationManager::class.java) ?: return

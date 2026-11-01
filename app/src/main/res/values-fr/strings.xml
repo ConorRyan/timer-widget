@@ -1,23 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Timer Widget</string>
-    <string name="add_timer">Ajouter un minuteur</string>
     <string name="delete_timer">Supprimer le minuteur</string>
     <string name="timer_name">Nom</string>
     <string name="timer_emoji">Émoji</string>
     <string name="timer_emoji_hint">✎</string>
-    <string name="timer_time">Durée</string>
     <string name="timer_sound">Sonnerie d\'alarme</string>
     <string name="timer_sound_default">Par défaut</string>
     <string name="new_timer">Nouveau minuteur</string>
     <string name="edit_timer">Modifier le minuteur</string>
     <string name="save">Enregistrer</string>
-    <string name="ok">OK</string>
     <string name="timer_fallback">Minuteur</string>
     <string name="hours">H</string>
     <string name="minutes">Min</string>
     <string name="seconds">S</string>
-    <string name="no_timers_hint">Aucun minuteur pour l\'instant. Touchez + pour en ajouter un.</string>
     <string name="widget_label">Minuteur</string>
     <string name="widget_config_title">Choisir un minuteur</string>
     <string name="config_no_timers">Aucun minuteur pour l\'instant. Ouvrez d\'abord l\'application et créez-en un.</string>
@@ -30,4 +26,28 @@
     <string name="stop_alarm">Arrêter</string>
     <string name="widget_preview_name">⏳</string>
     <string name="widget_preview_time">3:00</string>
+    <string name="timers_title">Minuteurs</string>
+    <string name="section_running">En cours</string>
+    <string name="section_all">Tous les minuteurs · touchez pour lancer</string>
+    <string name="start_timer">Lancer</string>
+    <string name="stop_timer">Arrêter</string>
+    <string name="stop_timer_named">Arrêter %1$s</string>
+    <string name="edit_timer_named">Modifier %1$s</string>
+    <string name="run_progress">sur %1$s · fin à %2$s</string>
+    <string name="run_finished">Temps écoulé</string>
+    <string name="empty_title">Aucun minuteur</string>
+    <string name="empty_body">Créez un minuteur ici, puis ajoutez un widget Timer Widget à votre écran d\'accueil. Une touche sur le widget le lance.</string>
+    <string name="empty_create">Créer votre premier minuteur</string>
+    <string name="close">Fermer</string>
+    <string name="wheel_hours">Heures</string>
+    <string name="wheel_minutes">Minutes</string>
+    <string name="wheel_seconds">Secondes</string>
+    <string name="wheel_hint">Faites défiler une roue ou touchez le nombre en surbrillance pour le saisir</string>
+    <string name="preset_minutes">%1$d min</string>
+    <string name="emoji_show_all">Tout afficher</string>
+    <string name="emoji_show_fewer">Afficher moins</string>
+    <string name="emoji_custom">Saisir un émoji</string>
+    <string name="sound_hint">Touchez une sonnerie pour l\'écouter.</string>
+    <string name="sound_playing">Lecture de l\'aperçu</string>
+    <string name="use_sound">Utiliser</string>
 </resources>

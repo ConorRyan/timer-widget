@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.conorryan.timerwidget.data.TimerDef
 import io.github.conorryan.timerwidget.data.TimerStore
+import io.github.conorryan.timerwidget.widget.TimerService
 import io.github.conorryan.timerwidget.widget.TimerWidgetViews
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,6 +16,8 @@ import kotlinx.coroutines.launch
 
 class TimerViewModel @JvmOverloads constructor(
     app: Application,
+    /** Injectable so tests can observe start/stop requests without the service. */
+    private val runControl: RunControl = ServiceRunControl(app),
     /** Injectable so tests can observe widget refreshes without AppWidgetManager. */
     private val refreshWidgets: suspend (Application) -> Unit = { application ->
         TimerWidgetViews.refreshAll(application)
@@ -44,6 +47,12 @@ class TimerViewModel @JvmOverloads constructor(
 
     fun remove(id: String) = mutate { list -> list.removeAll { it.id == id } }
 
+    /** Starts [timerId] without a widget, or stops it if it is running anywhere. */
+    fun toggleRun(timerId: String) = runControl.toggle(timerId)
+
+    /** Stops one run by its key in [TimerService.active]. */
+    fun stopRun(key: Int) = runControl.stop(key)
+
     /**
      * Applies [transform] to the in-memory UI state synchronously on the
      * caller's frame, then persists the resulting list in the background.
@@ -62,4 +71,15 @@ class TimerViewModel @JvmOverloads constructor(
             refreshWidgets(getApplication())
         }
     }
+}
+
+/** Start/stop requests the UI sends to [TimerService]. */
+interface RunControl {
+    fun toggle(timerId: String)
+    fun stop(key: Int)
+}
+
+private class ServiceRunControl(private val app: Application) : RunControl {
+    override fun toggle(timerId: String) = TimerService.toggleTimer(app, timerId)
+    override fun stop(key: Int) = TimerService.stopRun(app, key)
 }

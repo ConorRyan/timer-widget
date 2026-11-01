@@ -1,0 +1,4 @@
+Redesigned app: fixed dark theme matching the widget, timer list as a tile
+grid, and a full-screen editor with time wheels, minute presets, and a
+sound picker. Timers can now be started straight from the app - no widget
+needed - with live countdown cards for running timers.

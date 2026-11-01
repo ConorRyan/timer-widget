@@ -1,0 +1,5 @@
+Application repensée : thème sombre fixe assorti au widget, liste des timers
+sous forme de grille, et écran de saisie plein écran avec molettes, presets
+de minutes et sélecteur de son. Les timers peuvent désormais être lancés
+directement depuis l'application, sans widget, avec des cartes de compte à
+rebours en direct pour les timers en cours.

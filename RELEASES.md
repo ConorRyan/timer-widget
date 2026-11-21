@@ -62,7 +62,7 @@ exists.
      --ks-key-alias timerwidget \
      --v1-signing-enabled false \
      --alignment-preserved true \
-     --out timer-widget.<versionName>.apk \
+     --out app/build/outputs/apk/release/timer-widget.<versionName>.apk \
      app/build/outputs/apk/release/app-release-unsigned.apk
    ```
 
@@ -74,8 +74,12 @@ exists.
 
    Verify the signature with `apksigner verify` on the output file.
 
+   The signed APK (and the `.idsig` apksigner writes beside it) stays in
+   `app/build/`, which git ignores and `./gradlew clean` removes, so nothing
+   is left in the project folder after a release.
+
 6. **Create the GitHub release** on the tag and upload
-   `timer-widget.<versionName>.apk` as a release asset. The filename must
+   `app/build/outputs/apk/release/timer-widget.<versionName>.apk` as a release asset. The filename must
    follow the pattern exactly: `timer-widget.<versionName>.apk`. Use the
    en-US changelog file as the release notes.
 
